@@ -28,45 +28,13 @@
 										<small id="sampleNumHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
 									</div>
                                     <button onclick="addInputFields()" class="btn btn-primary">Submit Sample Number</button>
-                                    <button id="submitForm" style="display: none;" class="btn btn-primary">Submit Form</button>
+                                    <button id="submitForm" onclick="submitForm()" style="display: none;" class="btn btn-primary">Submit Form</button>
                                     <div id="errorMessage" style="color: red; display: none;">Empty input not allowed!</div>
                                 </div>
                                 <div id="sampleNameContainer"></div>
                                 <div id="samplePosContainer"></div>
 
-                                <script>
-                                function addInputFields() {
-                                    var number = document.getElementById('sampleNum').value;
-                                    var nameContainer = document.getElementById('sampleNameContainer');
-                                    var posContainer = document.getElementById('samplePosContainer');
-                                    nameContainer.innerHTML = ''; // Clear previous inputs
-                                    posContainer.innerHTML = '';
-                                    var errorMessage = document.getElementById('errorMessage');
 
-                                    if (number.trim() === '' || !Number.isInteger(parseFloat(number))) {
-                                        errorMessage.style.display = 'block';
-                                    } else {
-                                        errorMessage.style.display = 'none';
-                                        for (let i = 0; i < number; i++) {
-                                            const input = document.createElement('input');
-                                            input.type = 'text';
-                                            input.className = 'form-control mb-2'; // mb-2 for margin bottom
-                                            input.placeholder = `Sample name ${i + 1}`;
-                                            nameContainer.appendChild(input);
-                                        }
-
-                                        for (let i = 0; i < number; i++) {
-                                            const input = document.createElement('input');
-                                            input.type = 'text';
-                                            input.className = 'form-control mb-2'; // mb-2 for margin bottom
-                                            input.placeholder = `Sample position ${i + 1}`;
-                                            posContainer.appendChild(input);
-                                        }
-
-                                        document.getElementById('submitForm').style.display = 'block';
-                                    }
-                                }
-                                </script>
 
                             </div>
                         </div>
@@ -80,5 +48,68 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
+<script>
+    function addInputFields() {
+        var number = document.getElementById('sampleNum').value;
+        var nameContainer = document.getElementById('sampleNameContainer');
+        var posContainer = document.getElementById('samplePosContainer');
+        nameContainer.innerHTML = ''; // Clear previous inputs
+        posContainer.innerHTML = '';
+        var errorMessage = document.getElementById('errorMessage');
 
+        if (number.trim() === '' || !Number.isInteger(parseFloat(number))) {
+            errorMessage.style.display = 'block';
+        } else {
+            errorMessage.style.display = 'none';
+            for (let i = 0; i < number; i++) {
+                const input = document.createElement('input');
+                input.id = 'sampleName${i+1}';
+                input.type = 'text';
+                input.className = 'form-control mb-2'; // mb-2 for margin bottom
+                input.placeholder = `Sample name ${i + 1}`;
+                nameContainer.appendChild(input);
+            }
+
+            for (let i = 0; i < number; i++) {
+                const input = document.createElement('input');
+                input.id = 'samplePos${i+1}';
+                input.type = 'text';
+                input.className = 'form-control mb-2'; // mb-2 for margin bottom
+                input.placeholder = `Sample position ${i + 1}`;
+                posContainer.appendChild(input);
+            }
+
+            document.getElementById('submitForm').style.display = 'block';
+        }
+    }
+
+    function submitForm() {
+        var number = document.getElementById('sampleNum').value;
+        var data = {};
+        var allFilled = true;
+
+        for (let i = 0; i < number; i++) {
+            var sampleName = document.getElementById('sampleName${i+1}');
+            var samplePos = document.getElementById('samplePos${i+1}');
+            if (sampleName.value.trim() === '') {
+                allFilled = false;
+            } else {
+                data['sampleName${i+1}'] = sampleName.value;
+            }
+            if (samplePos.value.trim() === '') {
+                allFilled = false;
+            } else {
+                data['samplePos{i+1}'] = samplePos.value;
+            }
+        }
+
+        if (!allFilled) {
+            document.getElementById('errorMessage').style.display = 'block';
+        } else {
+            document.getElementById('errorMessage').style.display = 'none';
+            var jsonData = JSON.stringify(data);
+            console.log(jsonData);
+        }
+    }
+</script>
 {% endblock javascripts %}	
