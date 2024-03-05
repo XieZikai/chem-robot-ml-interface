@@ -44,7 +44,7 @@ def get_segment(request):
     try:
 
         segment = request.path.split('/')[-1]
-
+        # print(segment)
         if segment == '':
             segment = 'index'
 

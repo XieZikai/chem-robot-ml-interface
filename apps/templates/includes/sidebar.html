@@ -59,12 +59,13 @@
 							</span>
 							<h4 class="text-section">Components</h4>
 						</li>
-						<li class="nav-item {% if 'tasks-' in segment %}">
+						<li class="nav-item {% if 'tasks-' in segment %} active {% endif %}">
 							<a data-toggle="collapse" href="#tasks">
 								<i class="fas fa-pen-square"></i>
 								<p>Tasks</p>
+								<span class="caret"></span>
 							</a>
-							<div class="collapse {% if 'task-' in segment %} show {% endif %}" id="task">
+							<div class="collapse {% if 'task-' in segment %} show {% endif %}" id="tasks">
 								<ul class="nav nav-collapse">
 									<li class="{% if 'tasks-solubility' in segment %} active {% endif %}">
 										<a href="/tasks-solubility.html">
