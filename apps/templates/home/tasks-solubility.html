@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Task Hansen Solubility Parameter {% endblock %}
+{% block title %}Solubility{% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -14,6 +14,16 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Ongoing Experiment</div>
+                        </div>
+                        <div class="card-body">
+                            <div id="noOngoingMessage">There is no ongoing experiment.</div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title">Solubility Experiment Form Recipe</div>
@@ -24,17 +34,17 @@
                                 <div class="col-md-6 col-lg-4">
                                     <div class="form-group">
 										<label for="sampleNum">Sample Number</label>
-										<input type="number" class="form-control" id="sampleNum" placeholder="Enter Sample Nu,ber" step="1">
+										<input type="number" class="form-control" id="sampleNum" placeholder="Enter Sample Number" step="1">
 										<small id="sampleNumHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
 									</div>
                                     <button onclick="addInputFields()" class="btn btn-primary">Submit Sample Number</button>
+                                    <br><br>
                                     <button id="submitForm" onclick="submitForm()" style="display: none;" class="btn btn-primary">Submit Form</button>
                                     <div id="errorMessage" style="color: red; display: none;">Empty input not allowed!</div>
+                                    <div id="successMessage" style="color: green; display: none;">Submit succeed!</div>
                                 </div>
                                 <div id="sampleNameContainer"></div>
                                 <div id="samplePosContainer"></div>
-
-
 
                             </div>
                         </div>
@@ -87,6 +97,7 @@
         var number = document.getElementById('sampleNum').value;
         var data = {};
         var allFilled = true;
+        data['sampleNum'] = number;
 
         for (let i = 0; i < number; i++) {
             var sampleName = document.getElementById('sampleName${i+1}');
@@ -94,19 +105,21 @@
             if (sampleName.value.trim() === '') {
                 allFilled = false;
             } else {
-                data['sampleName${i+1}'] = sampleName.value;
+                data['sampleName' + (i+1)] = sampleName.value;
             }
             if (samplePos.value.trim() === '') {
                 allFilled = false;
             } else {
-                data['samplePos{i+1}'] = samplePos.value;
+                data['samplePos' + (i+1)] = samplePos.value;
             }
         }
 
         if (!allFilled) {
             document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
         } else {
             document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
             var jsonData = JSON.stringify(data);
             console.log(jsonData);
         }

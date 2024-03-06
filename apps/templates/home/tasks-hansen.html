@@ -1,15 +1,118 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Task Hansen Solubility Parameter {% endblock %}
+{% block title %}Hansen Solubility Parameter{% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
 
+    <div class="content">
+        <div class="page-inner">
+            <div class="page-header">
+                <h4 class="page-title">Hansen Solubility Parameter Experiment Form</h4>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Hansen Solubility Parameter Experiment Form Recipe</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="form-group">
+										<label for="sampleNum">Sample Number</label>
+										<input type="number" class="form-control" id="sampleNum" placeholder="Enter Sample Number" step="1">
+										<small id="sampleNumHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+									</div>
+                                    <button onclick="addInputFields()" class="btn btn-primary">Submit Sample Number</button>
+                                    <br><br>
+                                    <button id="submitForm" onclick="submitForm()" style="display: none;" class="btn btn-primary">Submit Form</button>
+                                    <div id="errorMessage" style="color: red; display: none;">Empty input not allowed!</div>
+                                    <div id="successMessage" style="color: green; display: none;">Submit succeed!</div>
+                                </div>
+                                <div id="sampleNameContainer"></div>
+                                <div id="samplePosContainer"></div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
+<script>
+    function addInputFields() {
+        var number = document.getElementById('sampleNum').value;
+        var nameContainer = document.getElementById('sampleNameContainer');
+        var posContainer = document.getElementById('samplePosContainer');
+        nameContainer.innerHTML = ''; // Clear previous inputs
+        posContainer.innerHTML = '';
+        var errorMessage = document.getElementById('errorMessage');
 
+        if (number.trim() === '' || !Number.isInteger(parseFloat(number))) {
+            errorMessage.style.display = 'block';
+        } else {
+            errorMessage.style.display = 'none';
+            for (let i = 0; i < number; i++) {
+                const input = document.createElement('input');
+                input.id = 'sampleName${i+1}';
+                input.type = 'text';
+                input.className = 'form-control mb-2'; // mb-2 for margin bottom
+                input.placeholder = `Sample name ${i + 1}`;
+                nameContainer.appendChild(input);
+            }
+
+            for (let i = 0; i < number; i++) {
+                const input = document.createElement('input');
+                input.id = 'samplePos${i+1}';
+                input.type = 'text';
+                input.className = 'form-control mb-2'; // mb-2 for margin bottom
+                input.placeholder = `Sample position ${i + 1}`;
+                posContainer.appendChild(input);
+            }
+
+            document.getElementById('submitForm').style.display = 'block';
+        }
+    }
+
+    function submitForm() {
+        var number = document.getElementById('sampleNum').value;
+        var data = {};
+        var allFilled = true;
+        data['sampleNum'] = number;
+
+        for (let i = 0; i < number; i++) {
+            var sampleName = document.getElementById('sampleName${i+1}');
+            var samplePos = document.getElementById('samplePos${i+1}');
+            if (sampleName.value.trim() === '') {
+                allFilled = false;
+            } else {
+                data['sampleName' + (i+1)] = sampleName.value;
+            }
+            if (samplePos.value.trim() === '') {
+                allFilled = false;
+            } else {
+                data['samplePos' + (i+1)] = samplePos.value;
+            }
+        }
+
+        if (!allFilled) {
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        } else {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+            var jsonData = JSON.stringify(data);
+            console.log(jsonData);
+        }
+    }
+</script>
 {% endblock javascripts %}
