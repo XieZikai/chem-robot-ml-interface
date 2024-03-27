@@ -53,7 +53,8 @@ class Config(object):
     if USE_SQLITE:
 
         # This will create a file in <app> FOLDER
-        SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3') 
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3')
+        SQLALCHEMY_BINDS = {'history_db': 'sqlite:///' + os.path.join(basedir, 'history.db')}
     
 class ProductionConfig(Config):
     DEBUG = False
