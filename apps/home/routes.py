@@ -4,9 +4,22 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from apps.home import blueprint
-from flask import render_template, request
+from flask import render_template, request, Response
 from flask_login import login_required
 from jinja2 import TemplateNotFound
+
+from apps.home.models import HansenImage
+
+
+@blueprint.route('/image_test/<int:image_id>')
+@login_required
+def get_image(image_id):
+    image = HansenImage.query.get(image_id)
+    if image:
+        # 返回图片数据，记得设置合适的MIME类型
+        return Response(image.image, mimetype='image/jpeg')
+    else:
+        return 'Image not found', 404
 
 
 @blueprint.route('/index')

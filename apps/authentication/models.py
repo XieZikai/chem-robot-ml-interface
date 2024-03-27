@@ -36,11 +36,6 @@ class Users(db.Model, UserMixin):
         return str(self.username)
 
 
-class HistoryModel(db.Model):
-    __bind_key__ = 'history_db'
-
-
-
 @login_manager.user_loader
 def user_loader(id):
     return Users.query.filter_by(id=id).first()
