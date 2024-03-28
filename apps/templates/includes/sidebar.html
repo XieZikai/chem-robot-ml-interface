@@ -114,6 +114,29 @@
 							</div>
 						</li>
 
+						<li class="nav-item {% if 'test-' in segment %} active {% endif %}">
+							<a data-toggle="collapse" href="#test">
+								<i class="fas fa-cloud"></i>
+								<p>Test</p>
+								<span class="caret"></span>
+							</a>
+
+							<div class="collapse {% if 'test-' in segment %} show {% endif %}" id="test">
+								<ul class="nav nav-collapse">
+									<li class="{% if 'test-figure' in segment %} active {% endif %}">
+										<a href="/test-figure.html">
+											<span class="sub-item">Figure Test</span>
+										</a>
+									</li>
+									<li class="{% if 'test-group' in segment %} active {% endif %}">
+										<a href="/test-group.html">
+											<span class="sub-item">Group test</span>
+										</a>
+									</li>
+								</ul>
+							</div>
+
+						</li>
 
 					</ul>
 				{% else %}

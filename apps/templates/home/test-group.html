@@ -1,0 +1,61 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Particle Size{% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <div class="content">
+        <div class="page-inner">
+            <div class="page-header">
+                <h4 class="page-title">Figure Group Test</h4>
+            </div>
+
+            <select id="groupSelect" onchange="loadImages()">
+                <option value="">Select a group</option>
+            </select>
+            <div id="imagesContainer"></div>
+
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.0.0/fetch.min.js"></script>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    fetch('/hansen_image_id')
+                        .then(response => response.json())
+                        .then(groups => {
+                            const select = document.getElementById('groupSelect');
+                            groups.forEach(group => {
+                                const option = document.createElement('option');
+                                option.value = group;
+                                option.textContent = group;
+                                select.appendChild(option);
+                            });
+                        });
+                });
+
+                function loadImages() {
+                    const group = document.getElementById('groupSelect').value;
+                    const container = document.getElementById('imagesContainer');
+                    container.innerHTML = '';  // 清空之前的图像
+
+                    if (group) {
+                        fetch(`/images/${group}`)
+                            .then(response => response.json())
+                            .then(images => {
+                                images.forEach(image => {
+                                    const img = new Image();
+                                    img.src = 'data:image/png;base64,' + image.image;
+                                    container.appendChild(img);
+                                });
+                            });
+                    }
+                }
+            </script>
+
+
+        </div>
+    </div>
+
+{% endblock content %}

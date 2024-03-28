@@ -1,0 +1,36 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Particle Size{% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <div class="content">
+        <div class="page-inner">
+            <div class="page-header">
+                <h4 class="page-title">Figure Test</h4>
+            </div>
+
+            <img id="image" src="" alt="Image will be displayed here">
+
+            <script>
+                fetch('/image/1') // 假设图片ID为1
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.image) {
+                            const imgElement = document.getElementById('image');
+                            imgElement.src = `data:image/png;base64,${data.image}`;
+                        } else {
+                            console.error('Image not found');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            </script>
+
+        </div>
+    </div>
+
+{% endblock content %}
+
