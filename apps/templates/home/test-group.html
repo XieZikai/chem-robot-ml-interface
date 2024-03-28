@@ -41,7 +41,7 @@
                     container.innerHTML = '';  // 清空之前的图像
 
                     if (group) {
-                        fetch(`/images/${group}`)
+                        fetch(`/hansen_images/${group}`)
                             .then(response => response.json())
                             .then(images => {
                                 images.forEach(image => {

@@ -2,40 +2,12 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
-
 from apps.home import blueprint
 from flask import render_template, request, Response, jsonify
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 
-from apps.home.models import HansenImage
-import base64
-
-
-@blueprint.route('/image/<int:image_id>')
-@login_required
-def get_image(image_id):
-    image = HansenImage.query.get(image_id)
-    if image:
-        # base64_image = base64.b64decode(image.image.encode('utf-8'))
-        return jsonify({'image': image.image})
-    return jsonify({'error': 'Image not found'}), 404
-
-
-@blueprint.route('/hansen_image_id')
-@login_required
-def get_hansen_image_id():
-    hansen_ids = HansenImage.query.with_entities(HansenImage.hansen_id).distinct().all()
-    hansen_ids = [hansen_id[0] for hansen_id in hansen_ids]
-    return jsonify(hansen_ids)
-
-
-@blueprint.route('/images/<int:hansen_id>')
-@login_required
-def get_hansen_images(hansen_id):
-    images = HansenImage.query.filter_by(hansen_id=hansen_id).all()
-    images_data = [{'id': image.id, 'image': image.image} for image in images]
-    return jsonify(images_data)
+from apps.home.histroy_routes import *
 
 
 @blueprint.route('/index')
