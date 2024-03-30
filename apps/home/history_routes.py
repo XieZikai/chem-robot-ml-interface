@@ -41,7 +41,7 @@ def get_particle_image_id():
 
 @blueprint.route('/particle_images/<int:particle_id>')
 @login_required
-def get_hansen_images(particle_id):
+def get_particle_images(particle_id):
     images = ParticleImage.query.filter_by(particle_id=particle_id).all()
     images_data = [{'id': image.id, 'image': image.image} for image in images]
     return jsonify(images_data)
@@ -57,7 +57,7 @@ def get_solubility_image_id():
 
 @blueprint.route('/solubility_images/<int:solubility_id>')
 @login_required
-def get_hansen_images(solubility_id):
+def get_solubility_images(solubility_id):
     images = SolubilityImage.query.filter_by(solubility_id=solubility_id).all()
     images_data = [{'id': image.id, 'image': image.image} for image in images]
     return jsonify(images_data)

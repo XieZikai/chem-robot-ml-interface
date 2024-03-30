@@ -1,15 +1,84 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Hansen Solubility Parameter{% endblock %}
+{% block title %}Solubility History{% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
 
+    <div class="content">
+        <div class="page-inner">
+            <div class="page-header">
+                <h4 class="page-title">Solubility Experiment Hisotry</h4>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="card">
+                        <select id="groupSelect" onchange="loadImages()" style="width: 400px; height: 40px;">
+                            <option value="">Select Particle experiment history</option>
+                        </select>
+                    </div>
+
+                    <div class="card">
+                        <div id="infoContainer"></div>
+                    </div>
+
+                    <div class="card">
+                        <div id="imagesContainer"></div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
-{% endblock javascripts %}	
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.0.0/fetch.min.js"></script>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    fetch('/solubility_image_id')
+                        .then(response => response.json())
+                        .then(groups => {
+                            const select = document.getElementById('groupSelect');
+                            groups.forEach(group => {
+                                const option = document.createElement('option');
+                                option.value = group;
+                                option.textContent = group;
+                                select.appendChild(option);
+                            });
+                        });
+                });
+
+                function loadImages() {
+                    const group = document.getElementById('groupSelect').value;
+                    const container = document.getElementById('imagesContainer');
+                    container.innerHTML = '';  // 清空之前的图像
+
+                    if (group) {
+                        fetch(`/solubility_images/${group}`)
+                            .then(response => response.json())
+                            .then(images => {
+                                images.forEach(image => {
+                                    const img = new Image();
+                                    img.src = 'data:image/png;base64,' + image.image;
+
+                                    const card = document.createElement('div');
+                                    card.className = 'card';
+                                    card.appendChild(img);
+                                    container.appendChild(card);
+                                });
+                            });
+                    }
+                }
+            </script>
+
+{% endblock javascripts %}
