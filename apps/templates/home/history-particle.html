@@ -3,7 +3,33 @@
 {% block title %}Particle Size History{% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse; /* 移除双边框 */
+        margin: 20px 0; /* 添加一些外边距 */
+    };
+
+    th, td {
+        padding: 8px; /* 添加内填充 */
+        text-align: left; /* 文本对齐 */
+        border-bottom: 1px solid #ddd; /* 底部边框线 */
+    };
+
+    th {
+        background-color: #f2f2f2; /* 标题背景色 */
+        color: #333; /* 标题文字颜色 */
+    };
+
+    tr:hover {
+        background-color: #f5f5f5; /* 悬停时行的背景色 */
+    };
+
+</style>
+
+{% endblock stylesheets %}
 
 {% block content %}
 
@@ -17,13 +43,36 @@
                 <div class="col-md-12">
 
                     <div class="card">
-                        <select id="groupSelect" onchange="loadImages()" style="width: 400px; height: 40px;">
-                            <option value="">Select Particle experiment history</option>
-                        </select>
+
+                        <div class="card-header">
+                            <div class="card-title">History</div>
+                        </div>
+
+                        <div class="card-body">
+                            <div id="infoContainer">
+                                <table id="infoTable" border="1">
+                                    <tr>
+                                        <th>id</th>
+                                        <th>time</th>
+                                        <th>sample_num</th>
+                                        <th>ongoing</th>
+                                        <th>comments</th>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="card">
-                        <div id="infoContainer"></div>
+                        <div class="card-header">
+                            <div class="card-title">View Experiment Images</div>
+                        </div>
+
+                        <div class="card-body">
+                            <select id="groupSelect" onchange="loadImages()" style="width: 400px; height: 40px;">
+                                <option value="">Select Particle experiment history</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="card">

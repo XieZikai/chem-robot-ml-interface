@@ -35,30 +35,43 @@
     <div class="content">
         <div class="page-inner">
             <div class="page-header">
-                <h4 class="page-title">Hansen Solubility Parameter Experiment Hisotry</h4>
+                <h4 class="page-title">Hansen Solubility Parameter Experiment History</h4>
             </div>
 
             <div class="row">
                 <div class="col-md-12">
 
                     <div class="card">
-                        <div id="infoContainer">
-                            <table id="infoTable" border="1">
-                                <tr>
-                                    <th>id</th>
-                                    <th>time</th>
-                                    <th>sample_num</th>
-                                    <th>ongoing</th>
-                                    <th>comments</th>
-                                </tr>
-                            </table>
+
+                        <div class="card-header">
+                            <div class="card-title">History</div>
+                        </div>
+
+                        <div class="card-body">
+                            <div id="infoContainer">
+                                <table id="infoTable" border="1">
+                                    <tr>
+                                        <th>id</th>
+                                        <th>time</th>
+                                        <th>sample_num</th>
+                                        <th>ongoing</th>
+                                        <th>comments</th>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
                     <div class="card">
-                        <select id="groupSelect" onchange="loadImages()" style="width: 400px; height: 40px;">
-                            <option value="">Select Hansen experiment history</option>
-                        </select>
+                        <div class="card-header">
+                            <div class="card-title">View Experiment Images</div>
+                        </div>
+
+                        <div class="card-body">
+                            <select id="groupSelect" onchange="loadImages()" style="width: 400px; height: 40px;">
+                                <option value="">Select Hansen experiment history</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="card">

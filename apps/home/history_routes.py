@@ -8,7 +8,7 @@ from apps.utils import image_serializer, history_serializer, sample_serializer
 
 @blueprint.route('/image/<int:image_id>')
 @login_required
-def get_image(image_id):
+def get_image(image_id):  # for test
     image = HansenImage.query.get(image_id)
     if image:
         # base64_image = base64.b64decode(image.image.encode('utf-8'))
@@ -27,12 +27,9 @@ def get_hansen_history():
 @blueprint.route('/hansen_image_id')
 @login_required
 def get_hansen_image_id():
-    image_data = HansenImage.query.all()
-    image_data = [image_serializer(data) for data in image_data]
-
-    # father_ids = HansenImage.query.with_entities(HansenImage.father_id).distinct().all()
-    # father_ids = [father_id[0] for father_id in father_ids]
-    return jsonify(image_data)
+    father_ids = HansenImage.query.with_entities(HansenImage.father_id).distinct().all()
+    father_ids = [father_id[0] for father_id in father_ids]
+    return jsonify(father_ids)
 
 
 @blueprint.route('/hansen_images/<int:father_id>')
