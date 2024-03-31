@@ -79,6 +79,32 @@
                             });
                     }
                 }
+
+                function loadHistoryData(){
+
+                    fetch('/solubility_history') // 确保这个URL与你的Flask路由匹配
+                        .then(response => response.json())
+                        .then(data => {
+                            const table = document.getElementById('infoTable');
+                            data.forEach(solubility_data => {
+                                const row = table.insertRow();
+                                const id = row.insertCell(0);
+                                const time = row.insertCell(1);
+                                const sample_number = row.insertCell(2);
+                                const ongoing = row.insertCell(3);
+                                const comments = row.insertCell(4);
+
+                                id.innerHTML = solubility_data.id;
+                                time.innerHTML = solubility_data.time;
+                                sample_number.innerHTML = solubility_data.sample_number;
+                                ongoing.innerHTML = solubility_data.ongoing;
+                                comments.innerHTML = solubility_data.comments;
+                            });
+                        })
+                        .catch(error => console.error('Error:', error));
+                }
+
+                window.onload = loadHistoryData();
             </script>
 
 {% endblock javascripts %}

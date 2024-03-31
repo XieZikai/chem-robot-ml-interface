@@ -2,7 +2,8 @@ from apps.home import blueprint
 from flask import jsonify
 from flask_login import login_required
 
-from apps.home.models import HansenImage, ParticleImage, SolubilityImage
+from apps.home.models import *
+from apps.utils import image_serializer, history_serializer, sample_serializer
 
 
 @blueprint.route('/image/<int:image_id>')
@@ -15,49 +16,76 @@ def get_image(image_id):
     return jsonify({'error': 'Image not found'}), 404
 
 
+@blueprint.route('/hansen_history')
+@login_required
+def get_hansen_history():
+    data = Hansen.query.all()
+    data = [history_serializer(history_data) for history_data in data]
+    return jsonify(data)
+
+
 @blueprint.route('/hansen_image_id')
 @login_required
 def get_hansen_image_id():
-    hansen_ids = HansenImage.query.with_entities(HansenImage.hansen_id).distinct().all()
-    hansen_ids = [hansen_id[0] for hansen_id in hansen_ids]
-    return jsonify(hansen_ids)
+    image_data = HansenImage.query.all()
+    image_data = [image_serializer(data) for data in image_data]
+
+    # father_ids = HansenImage.query.with_entities(HansenImage.father_id).distinct().all()
+    # father_ids = [father_id[0] for father_id in father_ids]
+    return jsonify(image_data)
 
 
-@blueprint.route('/hansen_images/<int:hansen_id>')
+@blueprint.route('/hansen_images/<int:father_id>')
 @login_required
-def get_hansen_images(hansen_id):
-    images = HansenImage.query.filter_by(hansen_id=hansen_id).all()
+def get_hansen_images(father_id):
+    images = HansenImage.query.filter_by(father_id=father_id).all()
     images_data = [{'id': image.id, 'image': image.image} for image in images]
     return jsonify(images_data)
+
+
+@blueprint.route('/particle_history')
+@login_required
+def get_particle_history():
+    data = Particle.query.all()
+    data = [history_serializer(history_data) for history_data in data]
+    return jsonify(data)
 
 
 @blueprint.route('/particle_image_id')
 @login_required
 def get_particle_image_id():
-    particle_ids = ParticleImage.query.with_entities(ParticleImage.particle_id).distinct().all()
-    particle_ids = [particle_id[0] for particle_id in particle_ids]
-    return jsonify(particle_ids)
+    father_ids = ParticleImage.query.with_entities(ParticleImage.father_id).distinct().all()
+    father_ids = [father_id[0] for father_id in father_ids]
+    return jsonify(father_ids)
 
 
-@blueprint.route('/particle_images/<int:particle_id>')
+@blueprint.route('/particle_images/<int:father_id>')
 @login_required
-def get_particle_images(particle_id):
-    images = ParticleImage.query.filter_by(particle_id=particle_id).all()
+def get_particle_images(father_id):
+    images = ParticleImage.query.filter_by(father_id=father_id).all()
     images_data = [{'id': image.id, 'image': image.image} for image in images]
     return jsonify(images_data)
+
+
+@blueprint.route('/solubility_history')
+@login_required
+def get_solubility_history():
+    data = Solubility.query.all()
+    data = [history_serializer(history_data) for history_data in data]
+    return jsonify(data)
 
 
 @blueprint.route('/solubility_image_id')
 @login_required
 def get_solubility_image_id():
-    solubility_ids = SolubilityImage.query.with_entities(SolubilityImage.solubility_id).distinct().all()
-    solubility_ids = [solubility_id[0] for solubility_id in solubility_ids]
-    return jsonify(solubility_ids)
+    father_ids = SolubilityImage.query.with_entities(SolubilityImage.father_id).distinct().all()
+    father_ids = [father_id[0] for father_id in father_ids]
+    return jsonify(father_ids)
 
 
-@blueprint.route('/solubility_images/<int:solubility_id>')
+@blueprint.route('/solubility_images/<int:father_id>')
 @login_required
-def get_solubility_images(solubility_id):
-    images = SolubilityImage.query.filter_by(solubility_id=solubility_id).all()
+def get_solubility_images(father_id):
+    images = SolubilityImage.query.filter_by(father_id=father_id).all()
     images_data = [{'id': image.id, 'image': image.image} for image in images]
     return jsonify(images_data)

@@ -79,6 +79,32 @@
                             });
                     }
                 }
+
+                function loadHistoryData(){
+
+                    fetch('/particle_history') // 确保这个URL与你的Flask路由匹配
+                        .then(response => response.json())
+                        .then(data => {
+                            const table = document.getElementById('infoTable');
+                            data.forEach(particle_data => {
+                                const row = table.insertRow();
+                                const id = row.insertCell(0);
+                                const time = row.insertCell(1);
+                                const sample_number = row.insertCell(2);
+                                const ongoing = row.insertCell(3);
+                                const comments = row.insertCell(4);
+
+                                id.innerHTML = particle_data.id;
+                                time.innerHTML = particle_data.time;
+                                sample_number.innerHTML = particle_data.sample_number;
+                                ongoing.innerHTML = particle_data.ongoing;
+                                comments.innerHTML = particle_data.comments;
+                            });
+                        })
+                        .catch(error => console.error('Error:', error));
+                }
+
+                window.onload = loadHistoryData();
             </script>
 
 {% endblock javascripts %}

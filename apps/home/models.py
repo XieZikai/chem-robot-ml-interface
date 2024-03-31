@@ -7,7 +7,9 @@ class Hansen(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, unique=True)
     time = db.Column(db.String(64), unique=True)
-    sample_num = db.Column(db.Integer)
+    sample_number = db.Column(db.Integer)
+    ongoing = db.Column(db.Integer)
+    comments = db.Column(db.String(64))
 
 
 class HansenImage(db.Model):
@@ -15,7 +17,7 @@ class HansenImage(db.Model):
     __tablename__ = 'Hansen-image'
 
     id = db.Column(db.Integer, primary_key=True, unique=True)
-    hansen_id = db.Column(db.Integer)
+    father_id = db.Column(db.Integer)
     image = db.Column(db.LargeBinary)
     time = db.Column(db.String(64), unique=True)
 
@@ -25,7 +27,7 @@ class HansenSamples(db.Model):
     __tablename__ = 'Hansen-samples'
 
     id = db.Column(db.Integer, primary_key=True, unique=True)
-    hansen_id = db.Column(db.Integer)
+    father_id = db.Column(db.Integer)
     sample_name = db.Column(db.String(64))
     sample_pos = db.Column(db.String(64))
 
@@ -36,7 +38,9 @@ class Particle(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, unique=True)
     time = db.Column(db.String(64), unique=True)
-    sample_num = db.Column(db.Integer)
+    sample_number = db.Column(db.Integer)
+    ongoing = db.Column(db.Integer)
+    comments = db.Column(db.String(64))
 
 
 class ParticleImage(db.Model):
@@ -44,7 +48,7 @@ class ParticleImage(db.Model):
     __tablename__ = 'Particle-image'
 
     id = db.Column(db.Integer, primary_key=True, unique=True)
-    particle_id = db.Column(db.Integer)
+    father_id = db.Column(db.Integer)
     image = db.Column(db.LargeBinary)
     time = db.Column(db.String(64), unique=True)
 
@@ -54,7 +58,7 @@ class ParticleSamples(db.Model):
     __tablename__ = 'Particle-samples'
 
     id = db.Column(db.Integer, primary_key=True, unique=True)
-    particle_id = db.Column(db.Integer)
+    father_id = db.Column(db.Integer)
     sample_name = db.Column(db.String(64))
     sample_pos = db.Column(db.String(64))
 
@@ -65,7 +69,9 @@ class Solubility(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, unique=True)
     time = db.Column(db.String(64), unique=True)
-    sample_num = db.Column(db.Integer)
+    sample_number = db.Column(db.Integer)
+    ongoing = db.Column(db.Integer)
+    comments = db.Column(db.String(64))
 
 
 class SolubilityImage(db.Model):
@@ -73,7 +79,7 @@ class SolubilityImage(db.Model):
     __tablename__ = 'Solubility-image'
 
     id = db.Column(db.Integer, primary_key=True, unique=True)
-    solubility_id = db.Column(db.Integer)
+    father_id = db.Column(db.Integer)
     image = db.Column(db.LargeBinary)
     time = db.Column(db.String(64), unique=True)
 
@@ -83,6 +89,6 @@ class SolubilitySamples(db.Model):
     __tablename__ = 'Solubility-samples'
 
     id = db.Column(db.Integer, primary_key=True, unique=True)
-    solubility_id = db.Column(db.Integer)
+    father_id = db.Column(db.Integer)
     sample_name = db.Column(db.String(64))
     sample_pos = db.Column(db.String(64))
