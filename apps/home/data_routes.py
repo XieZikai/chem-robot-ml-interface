@@ -1,6 +1,9 @@
 from apps.home import blueprint
-from flask import jsonify
+from flask import jsonify, request
 from flask_login import login_required
+import sqlite3
+import datetime
+from sqlalchemy import func
 
 from apps.home.models import *
 from apps.utils import image_serializer, history_serializer, sample_serializer
@@ -86,3 +89,26 @@ def get_solubility_images(father_id):
     images = SolubilityImage.query.filter_by(father_id=father_id).all()
     images_data = [{'id': image.id, 'image': image.image} for image in images]
     return jsonify(images_data)
+
+
+@blueprint.route('/submit_solubility_task', methods=['POST'])
+@login_required
+def submit_hansen():
+    data = request.json
+    conn = sqlite3.connect('./apps/history.db')
+    cursor = conn.cursor()
+    time = str(datetime.datetime.now())
+    cursor.execute("INSERT INTO Solubility (time, sample_number, ongoing) VALUES (?, ?, ?)",
+                   (time, data['sampleNum'], 0))
+    conn.commit()
+
+    id = Solubility.query.with_entities(func.max(Solubility.id)).scalar()
+
+    for i in range(data['sampleNum']):
+        cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_pos) VALUES (?, ?, ?)",
+                       (id, data['sampleName'+str(i+1), data['samplePos'+str(i+1)]]))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({'message': 'Data received!'})

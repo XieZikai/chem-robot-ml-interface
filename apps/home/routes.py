@@ -7,7 +7,7 @@ from flask import render_template, request, Response, jsonify
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 
-from apps.home.history_routes import *
+from apps.home.data_routes import *
 
 
 @blueprint.route('/index')
