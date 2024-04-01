@@ -3,7 +3,38 @@
 {% block title %}Solubility{% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse; /* 移除双边框 */
+        margin: 20px 0; /* 添加一些外边距 */
+    }
+
+    th, td {
+        padding: 8px; /* 添加内填充 */
+        text-align: left; /* 文本对齐 */
+        border-bottom: 1px solid #ddd; /* 底部边框线 */
+    }
+
+    th {
+        background-color: #f2f2f2; /* 标题背景色 */
+        color: #333; /* 标题文字颜色 */
+    }
+
+    tr:hover {
+        background-color: #f5f5f5; /* 悬停时行的背景色 */
+    }
+
+    tbody {
+      margin: 0 0;
+      padding: 0 0;
+    }
+</style>
+
+
+{% endblock stylesheets %}
 
 {% block content %}
 
@@ -20,7 +51,17 @@
                             <div class="card-title">Ongoing Experiment</div>
                         </div>
                         <div class="card-body">
-                            <div id="noOngoingMessage">There is no ongoing experiment.</div>
+                            <div id="infoContainer">
+                                <table id="infoTable" border="1">
+                                    <tr>
+                                        <th>id</th>
+                                        <th>time</th>
+                                        <th>sample_num</th>
+                                        <th>ongoing</th>
+                                        <th>comments</th>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
@@ -124,5 +165,45 @@
             console.log(jsonData);
         }
     }
+
+    function loadHistoryData(){
+        fetch('/solubility_history') // 确保这个URL与你的Flask路由匹配
+            .then(response => response.json())
+            .then(data => {
+                const table = document.getElementById('infoTable');
+                const emptyMessage = document.getElementById('noOngoingMessage');
+
+                data.forEach(hansen_data => {
+                    if (hansen_data.ongoing === 0) {
+                        return;
+                    }
+
+                    const row = table.insertRow();
+                    const id = row.insertCell(0);
+                    const time = row.insertCell(1);
+                    const sample_number = row.insertCell(2);
+                    const ongoing = row.insertCell(3);
+                    const comments = row.insertCell(4);
+
+                    id.innerHTML = hansen_data.id;
+                    time.innerHTML = hansen_data.time;
+                    sample_number.innerHTML = hansen_data.sample_number;
+                    ongoing.innerHTML = hansen_data.ongoing;
+                    comments.innerHTML = hansen_data.comments;
+                });
+                const numberOfRows = table.rows.length;
+
+                if (numberOfRows === 0) {
+                    emptyMessage.style.display = "block";
+                    table.style.display = "none";
+                } else {
+                    emptyMessage.style.display = "none";
+                    table.style.display = "block";
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    window.onload = loadHistoryData();
 </script>
 {% endblock javascripts %}	
