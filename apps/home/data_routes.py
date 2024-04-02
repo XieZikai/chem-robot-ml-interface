@@ -43,6 +43,34 @@ def get_hansen_images(father_id):
     return jsonify(images_data)
 
 
+@blueprint.route('/submit_hansen_task', methods=['POST'])
+@login_required
+def submit_hansen():
+    data = request.json
+    conn = sqlite3.connect('./apps/history.db')
+    cursor = conn.cursor()
+    time = str(datetime.datetime.now())
+    cursor.execute("INSERT INTO Hansen (time, sample_number, ongoing) VALUES (?, ?, ?)",
+                   (time, data['sampleNum'], 0))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    id = Hansen.query.with_entities(func.max(Hansen.id)).scalar()
+
+    conn = sqlite3.connect('./apps/history.db')
+    cursor = conn.cursor()
+
+    for i in range(int(data['sampleNum'])):
+        cursor.execute("INSERT INTO 'Hansen-samples' (father_id, sample_name, sample_pos) VALUES (?, ?, ?)",
+                       (id, data['sampleName'+str(i+1)], data['samplePos'+str(i+1)]))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({'message': 'Complete!'})
+
+
 @blueprint.route('/particle_history')
 @login_required
 def get_particle_history():
@@ -65,6 +93,34 @@ def get_particle_images(father_id):
     images = ParticleImage.query.filter_by(father_id=father_id).all()
     images_data = [{'id': image.id, 'image': image.image} for image in images]
     return jsonify(images_data)
+
+
+@blueprint.route('/submit_particle_task', methods=['POST'])
+@login_required
+def submit_particle():
+    data = request.json
+    conn = sqlite3.connect('./apps/history.db')
+    cursor = conn.cursor()
+    time = str(datetime.datetime.now())
+    cursor.execute("INSERT INTO Particle (time, sample_number, ongoing) VALUES (?, ?, ?)",
+                   (time, data['sampleNum'], 0))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    id = Particle.query.with_entities(func.max(Particle.id)).scalar()
+
+    conn = sqlite3.connect('./apps/history.db')
+    cursor = conn.cursor()
+
+    for i in range(int(data['sampleNum'])):
+        cursor.execute("INSERT INTO 'Particle-samples' (father_id, sample_name, sample_pos, concentration) VALUES (?, ?, ?, ?)",
+                       (id, data['sampleName'+str(i+1)], data['samplePos'+str(i+1)], data['concentration'+str(i+1)]))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({'message': 'Complete!'})
 
 
 @blueprint.route('/solubility_history')
@@ -93,16 +149,21 @@ def get_solubility_images(father_id):
 
 @blueprint.route('/submit_solubility_task', methods=['POST'])
 @login_required
-def submit_hansen():
+def submit_solubility():
     data = request.json
-    conn = sqlite3.connect(r'C:\Users\shibi\PycharmProjects\chem-robot-ml-interface\apps\history.db')
+    conn = sqlite3.connect('./apps/history.db')
     cursor = conn.cursor()
     time = str(datetime.datetime.now())
     cursor.execute("INSERT INTO Solubility (time, sample_number, ongoing) VALUES (?, ?, ?)",
                    (time, data['sampleNum'], 0))
     conn.commit()
+    cursor.close()
+    conn.close()
 
     id = Solubility.query.with_entities(func.max(Solubility.id)).scalar()
+
+    conn = sqlite3.connect('./apps/history.db')
+    cursor = conn.cursor()
 
     for i in range(int(data['sampleNum'])):
         cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_pos) VALUES (?, ?, ?)",
