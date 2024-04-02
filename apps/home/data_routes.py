@@ -104,10 +104,11 @@ def submit_hansen():
 
     id = Solubility.query.with_entities(func.max(Solubility.id)).scalar()
 
-    for i in range(data['sampleNum']):
+    for i in range(int(data['sampleNum'])):
         cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_pos) VALUES (?, ?, ?)",
                        (id, data['sampleName'+str(i+1)], data['samplePos'+str(i+1)]))
 
     conn.commit()
     cursor.close()
     conn.close()
+    return jsonify({'message': 'Complete!'})
