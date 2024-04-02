@@ -114,19 +114,19 @@
             errorMessage.style.display = 'none';
             for (let i = 0; i < number; i++) {
                 const input = document.createElement('input');
-                input.id = 'sampleName${i+1}';
+                input.id = 'sampleName' + (i+1);
                 input.type = 'text';
                 input.className = 'form-control mb-2'; // mb-2 for margin bottom
-                input.placeholder = `Sample name ${i + 1}`;
+                input.placeholder = `Sample name ` + (i+1);
                 nameContainer.appendChild(input);
             }
 
             for (let i = 0; i < number; i++) {
                 const input = document.createElement('input');
-                input.id = 'samplePos${i+1}';
+                input.id = 'samplePos' + (i+1);
                 input.type = 'text';
                 input.className = 'form-control mb-2'; // mb-2 for margin bottom
-                input.placeholder = `Sample position ${i + 1}`;
+                input.placeholder = `Sample position ` + (i+1);
                 posContainer.appendChild(input);
             }
 
@@ -141,8 +141,8 @@
         data['sampleNum'] = number;
 
         for (let i = 0; i < number; i++) {
-            var sampleName = document.getElementById('sampleName${i+1}');
-            var samplePos = document.getElementById('samplePos${i+1}');
+            var sampleName = document.getElementById('sampleName' + (i+1));
+            var samplePos = document.getElementById('samplePos' + (i+1));
             if (sampleName.value.trim() === '') {
                 allFilled = false;
             } else {

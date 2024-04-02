@@ -95,7 +95,7 @@ def get_solubility_images(father_id):
 @login_required
 def submit_hansen():
     data = request.json
-    conn = sqlite3.connect('./apps/history.db')
+    conn = sqlite3.connect(r'C:\Users\shibi\PycharmProjects\chem-robot-ml-interface\apps\history.db')
     cursor = conn.cursor()
     time = str(datetime.datetime.now())
     cursor.execute("INSERT INTO Solubility (time, sample_number, ongoing) VALUES (?, ?, ?)",
@@ -106,9 +106,8 @@ def submit_hansen():
 
     for i in range(data['sampleNum']):
         cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_pos) VALUES (?, ?, ?)",
-                       (id, data['sampleName'+str(i+1), data['samplePos'+str(i+1)]]))
+                       (id, data['sampleName'+str(i+1)], data['samplePos'+str(i+1)]))
 
     conn.commit()
     cursor.close()
     conn.close()
-    return jsonify({'message': 'Data received!'})
