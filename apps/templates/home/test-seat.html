@@ -1,0 +1,105 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Particle Size{% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+<style>
+
+  .seatContainer {
+    display: flex;
+    flex-wrap: wrap;
+    width: 230px; /* 根据座位大小和间距调整容器宽度 */
+  }
+
+  .seat {
+    width: 20px;
+    height: 20px;
+    background-color: #ccc;
+    margin: 3px;
+    display: inline-block;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .seat.selected {
+    background-color: #f00;
+  }
+
+  .seat span {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 10px;
+    color: black;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+  }
+
+  .selected span {
+    display: flex;
+  }
+</style>
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+    <div class="content">
+        <div class="page-inner">
+            <div class="page-header">
+                <h4 class="page-title">Seat Test</h4>
+            </div>
+
+            <div id="seatContainer"></div>
+
+        </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const seatContainer = document.getElementById('seatContainer');
+      const rows = 5;
+      const cols = 10;
+      let globalClickCount = 0; // 全局点击次数，用于分配座位编号
+
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          const seat = document.createElement('div');
+          seat.classList.add('seat');
+          seat.dataset.row = i + 1;
+          seat.dataset.col = j + 1;
+          seat.dataset.selected = false; // 初始化座位未被选中
+          const span = document.createElement('span');
+          seat.appendChild(span);
+
+          seat.addEventListener('click', function () {
+            if (this.dataset.selected === "false") {
+              this.dataset.selected = "true";
+              globalClickCount += 1; // 增加全局点击次数
+              this.classList.add('selected');
+              span.textContent = globalClickCount; // 显示座位编号
+              console.log(`Seat selected: Row ${this.dataset.row}, Column ${this.dataset.col}, Seat number: ${globalClickCount}`);
+            } else {
+              this.dataset.selected = "false";
+              globalClickCount -= 1; // 增加全局点击次数
+              this.classList.remove('selected');
+              span.textContent = ''; // 取消显示座位编号
+              // 这里不记录取消选中的操作，所以不打印日志
+            }
+          });
+
+          seatContainer.appendChild(seat);
+        }
+      }
+    });
+</script>
+
+{% endblock content %}
+
+
