@@ -44,6 +44,21 @@
   .selected span {
     display: flex;
   }
+
+
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    50% { transform: translateX(2px); }
+    75% { transform: translateX(-2px); }
+    100% { transform: translateX(0); }
+  }
+
+  .seat.shake {
+    animation: shake 0.5s; /* 动画名称，持续时间 */
+    animation-iteration-count: 1; /* 动画播放次数 */
+  }
+
 </style>
 
 {% endblock stylesheets %}
@@ -57,16 +72,27 @@
             </div>
 
             <div id="seatContainer"></div>
+            <div id="errorMessage" style="color: red; display: none;">All seats selected!</div>
+            <div id="errorMessageBack" style="color: red; display: none;">Please unselect the latest one first!</div>
 
         </div>
     </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+      var errorMessage = document.getElementById('errorMessage');
+      var errorMessageBack = document.getElementById('errorMessageBack');
+
       const seatContainer = document.getElementById('seatContainer');
       const rows = 5;
       const cols = 10;
       let globalClickCount = 0; // 全局点击次数，用于分配座位编号
+
+      var selectedSeat = {};
+      var numSelect = 5;
+
+      let selectedRows = [];
+      let selectedCols = [];
 
       for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
@@ -79,23 +105,48 @@
           seat.appendChild(span);
 
           seat.addEventListener('click', function () {
-            if (this.dataset.selected === "false") {
+            if (this.dataset.selected === "false" && numSelect > 0) {
               this.dataset.selected = "true";
               globalClickCount += 1; // 增加全局点击次数
               this.classList.add('selected');
               span.textContent = globalClickCount; // 显示座位编号
+              numSelect -= 1;
               console.log(`Seat selected: Row ${this.dataset.row}, Column ${this.dataset.col}, Seat number: ${globalClickCount}`);
-            } else {
+              errorMessage.style.display = 'none';
+              errorMessageBack.style.display = 'none';
+              selectedRows.push(i);
+              selectedCols.push(j);
+            } else if (this.dataset.selected === "false" && numSelect === 0) {
+              errorMessage.style.display = 'block';
+              errorMessageBack.style.display = 'none';
+            } else if (i === selectedRows[selectedRows.length-1] && j === selectedCols[selectedCols.length-1]){
               this.dataset.selected = "false";
               globalClickCount -= 1; // 增加全局点击次数
+              numSelect += 1;
               this.classList.remove('selected');
               span.textContent = ''; // 取消显示座位编号
+              selectedRows.pop();
+              selectedCols.pop();
+              errorMessage.style.display = 'none';
+              errorMessageBack.style.display = 'none';
               // 这里不记录取消选中的操作，所以不打印日志
+            } else {
+              errorMessage.style.display = 'none';
+              errorMessageBack.style.display = 'block';
             }
-          });
 
+            this.classList.remove('shake'); // 先移除类以确保动画可以再次触发
+            void this.offsetWidth; // 触发重绘以确保动画可以重新开始
+            this.classList.add('shake');
+
+          });
+          seat.addEventListener('animationend', function () {
+            this.classList.remove('shake');
+          });
           seatContainer.appendChild(seat);
         }
+        const breakElement = document.createElement('br');
+        seatContainer.appendChild(breakElement);
       }
     });
 </script>
