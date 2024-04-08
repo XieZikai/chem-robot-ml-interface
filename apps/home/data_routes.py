@@ -6,7 +6,7 @@ import datetime
 from sqlalchemy import func
 
 from apps.home.models import *
-from apps.utils import image_serializer, history_serializer, sample_serializer
+from apps.utils import rack_serializer, history_serializer, sample_serializer
 
 
 @blueprint.route('/image/<int:image_id>')
@@ -61,8 +61,8 @@ def submit_hansen():
     cursor = conn.cursor()
 
     for i in range(int(data['sampleNum'])):
-        cursor.execute("INSERT INTO 'Hansen-samples' (father_id, sample_name, sample_row, sample_col) VALUES (?, ?, ?, ?)",
-                       (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)]))
+        cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_row, sample_col, shake) VALUES (?, ?, ?, ?, ?)",
+                       (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)], data['shake'+str(i+1)]))
 
     conn.commit()
     cursor.close()
@@ -113,8 +113,8 @@ def submit_particle():
     cursor = conn.cursor()
 
     for i in range(int(data['sampleNum'])):
-        cursor.execute("INSERT INTO 'Particle-samples' (father_id, sample_name, sample_row, sample_col, concentration) VALUES (?, ?, ?, ?, ?)",
-                       (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)], data['concentration'+str(i+1)]))
+        cursor.execute("INSERT INTO 'Particle-samples' (father_id, sample_name, sample_row, sample_col, concentration, shake) VALUES (?, ?, ?, ?, ?, ?)",
+                       (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)], data['concentration'+str(i+1)], data['shake'+str(i+1)]))
 
     conn.commit()
     cursor.close()
@@ -165,10 +165,18 @@ def submit_solubility():
     cursor = conn.cursor()
 
     for i in range(int(data['sampleNum'])):
-        cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_row, sample_col) VALUES (?, ?, ?, ?)",
-                       (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)]))
+        cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_row, sample_col, shake) VALUES (?, ?, ?, ?, ?)",
+                       (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)], data['shake'+str(i+1)]))
 
     conn.commit()
     cursor.close()
     conn.close()
     return jsonify({'message': 'Complete!'})
+
+
+@blueprint.route('/rack_avail')
+@login_required
+def rack_avail():
+    data = RackAvailability.query.filter_by(available=1).all()
+    data = [rack_serializer(rack_data) for rack_data in data]
+    return jsonify(data)

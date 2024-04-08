@@ -183,6 +183,17 @@
                 input.type = 'text';
                 input.className = 'form-control mb-2'; // mb-2 for margin bottom
                 input.placeholder = `Sample name `+(i+1);
+
+                const checkbox = document.createElement('input');
+                checkbox.id = 'shake' + (i + 1);
+                checkbox.type = 'checkbox';
+                checkbox.className = 'form-check-input ml-2';
+
+                const label = document.createElement('label');
+                label.textContent = 'Shake it up!';
+
+                nameContainer.appendChild(checkbox);
+                nameContainer.appendChild(label);
                 nameContainer.appendChild(input);
             }
 
@@ -200,6 +211,8 @@
         for (let i = 0; i < number; i++) {
             var sampleName = document.getElementById('sampleName'+(i+1));
             var samplePos = document.getElementById('samplePos'+(i+1));
+            var shake = document.getElementById('shake'+(i+1));
+
             if (sampleName.value.trim() === '') {
                 allFilled = false;
             } else {
@@ -211,6 +224,12 @@
             } else {
                 data['sampleRow' + (i+1)] = selectedRows[i];
                 data['sampleCol' + (i+1)] = selectedCols[i];
+            }
+
+            if (shake.checked) {
+                data['shake' + (i+1)] = 1;
+            } else {
+                data['shake' + (i+1)] = 0;
             }
         }
 
@@ -267,10 +286,8 @@
                 const numberOfRows = table.rows.length;
 
                 if (numberOfRows === 0) {
-                    emptyMessage.style.display = "block";
                     table.style.display = "none";
                 } else {
-                    emptyMessage.style.display = "none";
                     table.style.display = "block";
                 }
             })

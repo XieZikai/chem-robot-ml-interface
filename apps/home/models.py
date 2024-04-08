@@ -31,6 +31,7 @@ class HansenSamples(db.Model):
     sample_name = db.Column(db.String(64))
     sample_row = db.Column(db.Integer)
     sample_col = db.Column(db.Integer)
+    shake = db.Column(db.Integer)
 
 
 class Particle(db.Model):
@@ -61,7 +62,9 @@ class ParticleSamples(db.Model):
     id = db.Column(db.Integer, primary_key=True, unique=True)
     father_id = db.Column(db.Integer)
     sample_name = db.Column(db.String(64))
-    sample_pos = db.Column(db.String(64))
+    sample_row = db.Column(db.Integer)
+    sample_col = db.Column(db.Integer)
+    shake = db.Column(db.Integer)
 
 
 class Solubility(db.Model):
@@ -92,4 +95,16 @@ class SolubilitySamples(db.Model):
     id = db.Column(db.Integer, primary_key=True, unique=True)
     father_id = db.Column(db.Integer)
     sample_name = db.Column(db.String(64))
-    sample_pos = db.Column(db.String(64))
+    sample_row = db.Column(db.Integer)
+    sample_col = db.Column(db.Integer)
+    shake = db.Column(db.Integer)
+
+
+class RackAvailability(db.Model):
+    __bind_key__ = 'history_db'
+    __tablename__ = 'Rack-availability'
+
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    row = db.Column(db.Integer)
+    col = db.Column(db.Integer)
+    available = db.Column(db.Integer)

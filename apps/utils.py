@@ -24,3 +24,10 @@ def sample_serializer(sample):
         'sample_name': sample.sample_name,
         'sample_pos': sample.sample_pos
     }
+
+
+def rack_serializer(sample):
+    return {
+        'row': sample.row,
+        'col': sample.col
+    }

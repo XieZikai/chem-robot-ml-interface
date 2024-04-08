@@ -187,6 +187,17 @@
                 input.type = 'text';
                 input.className = 'form-control mb-2'; // mb-2 for margin bottom
                 input.placeholder = `Sample name `+(i+1);
+
+                const checkbox = document.createElement('input');
+                checkbox.id = 'shake' + (i + 1);
+                checkbox.type = 'checkbox';
+                checkbox.className = 'form-check-input ml-2';
+
+                const label = document.createElement('label');
+                label.textContent = 'Shake it up!';
+
+                nameContainer.appendChild(checkbox);
+                nameContainer.appendChild(label);
                 nameContainer.appendChild(input);
             }
 
@@ -232,6 +243,12 @@
                 allFilled = false;
             } else {
                 data['concentration' + (i+1)] = concentration.value;
+            }
+
+            if (shake.checked) {
+                data['shake' + (i+1)] = 1;
+            } else {
+                data['shake' + (i+1)] = 0;
             }
         }
 
@@ -289,10 +306,8 @@
                 const numberOfRows = table.rows.length;
 
                 if (numberOfRows === 0) {
-                    emptyMessage.style.display = "block";
                     table.style.display = "none";
                 } else {
-                    emptyMessage.style.display = "none";
                     table.style.display = "block";
                 }
             })
