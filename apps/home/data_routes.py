@@ -14,7 +14,6 @@ from apps.utils import image_serializer, history_serializer, sample_serializer
 def get_image(image_id):  # for test
     image = HansenImage.query.get(image_id)
     if image:
-        # base64_image = base64.b64decode(image.image.encode('utf-8'))
         return jsonify({'image': image.image})
     return jsonify({'error': 'Image not found'}), 404
 
@@ -62,8 +61,8 @@ def submit_hansen():
     cursor = conn.cursor()
 
     for i in range(int(data['sampleNum'])):
-        cursor.execute("INSERT INTO 'Hansen-samples' (father_id, sample_name, sample_pos) VALUES (?, ?, ?)",
-                       (id, data['sampleName'+str(i+1)], data['samplePos'+str(i+1)]))
+        cursor.execute("INSERT INTO 'Hansen-samples' (father_id, sample_name, sample_row, sample_col) VALUES (?, ?, ?, ?)",
+                       (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)]))
 
     conn.commit()
     cursor.close()
@@ -114,8 +113,8 @@ def submit_particle():
     cursor = conn.cursor()
 
     for i in range(int(data['sampleNum'])):
-        cursor.execute("INSERT INTO 'Particle-samples' (father_id, sample_name, sample_pos, concentration) VALUES (?, ?, ?, ?)",
-                       (id, data['sampleName'+str(i+1)], data['samplePos'+str(i+1)], data['concentration'+str(i+1)]))
+        cursor.execute("INSERT INTO 'Particle-samples' (father_id, sample_name, sample_row, sample_col, concentration) VALUES (?, ?, ?, ?, ?)",
+                       (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)], data['concentration'+str(i+1)]))
 
     conn.commit()
     cursor.close()
@@ -166,8 +165,8 @@ def submit_solubility():
     cursor = conn.cursor()
 
     for i in range(int(data['sampleNum'])):
-        cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_pos) VALUES (?, ?, ?)",
-                       (id, data['sampleName'+str(i+1)], data['samplePos'+str(i+1)]))
+        cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_row, sample_col) VALUES (?, ?, ?, ?)",
+                       (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)]))
 
     conn.commit()
     cursor.close()

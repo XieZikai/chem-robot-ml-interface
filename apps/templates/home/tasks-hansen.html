@@ -49,6 +49,10 @@
   }
 
   .seat.selected {
+    background-color: #0f0;
+  }
+
+  .seat.unavail {
     background-color: #f00;
   }
 
@@ -138,10 +142,10 @@
 
                                 <div class="col-md-4 col-lg-4">
                                     <div id="sampleNameContainer"></div>
-                                    <div id="samplePosContainer"></div>
                                 </div>
 
                                 <div class="col-md-4 col-lg-4">
+                                    <label>Select Rack</label>
                                     <div id="seatContainer"></div>
                                     <div id="errorMessageSelect" style="color: red; display: none;">All seats selected!</div>
                                     <div id="errorMessageBack" style="color: red; display: none;">Please unselect the latest one first!</div>
@@ -160,12 +164,13 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 <script>
+    let selectedRows = [];
+    let selectedCols = [];
+
     function addInputFields() {
         var number = document.getElementById('sampleNum').value;
         var nameContainer = document.getElementById('sampleNameContainer');
-        var posContainer = document.getElementById('samplePosContainer');
         nameContainer.innerHTML = ''; // Clear previous inputs
-        posContainer.innerHTML = '';
         var errorMessage = document.getElementById('errorMessage');
 
         if (number.trim() === '' || !Number.isInteger(parseFloat(number))) {
@@ -181,16 +186,8 @@
                 nameContainer.appendChild(input);
             }
 
-            for (let i = 0; i < number; i++) {
-                const input = document.createElement('input');
-                input.id = 'samplePos'+(i+1);
-                input.type = 'text';
-                input.className = 'form-control mb-2'; // mb-2 for margin bottom
-                input.placeholder = `Sample position `+(i+1);
-                posContainer.appendChild(input);
-            }
-
             document.getElementById('submitForm').style.display = 'block';
+            generateSeat(number);
         }
     }
 
@@ -208,10 +205,12 @@
             } else {
                 data['sampleName' + (i+1)] = sampleName.value;
             }
-            if (samplePos.value.trim() === '') {
+
+            if (selectedRows.length < number) {
                 allFilled = false;
             } else {
-                data['samplePos' + (i+1)] = samplePos.value;
+                data['sampleRow' + (i+1)] = selectedRows[i];
+                data['sampleCol' + (i+1)] = selectedCols[i];
             }
         }
 
@@ -246,7 +245,6 @@
             .then(response => response.json())
             .then(data => {
                 const table = document.getElementById('infoTable');
-                const emptyMessage = document.getElementById('noOngoingMessage');
 
                 data.forEach(hansen_data => {
                     if (hansen_data.ongoing === 0) {
@@ -290,9 +288,6 @@
         let globalClickCount = 0; // 全局点击次数，用于分配座位编号
 
         var selectedSeat = {};
-
-        let selectedRows = [];
-        let selectedCols = [];
 
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {

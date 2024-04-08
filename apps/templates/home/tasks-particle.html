@@ -31,6 +31,62 @@
       margin: 0 0;
       padding: 0 0;
     }
+
+      .seatContainer {
+    display: flex;
+    flex-wrap: wrap;
+    width: 230px; /* 根据座位大小和间距调整容器宽度 */
+  }
+
+  .seat {
+    width: 20px;
+    height: 20px;
+    background-color: #ccc;
+    margin: 3px;
+    display: inline-block;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .seat.selected {
+    background-color: #0f0;
+  }
+
+  .seat.unavail {
+    background-color: #f00;
+  }
+
+  .seat span {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 10px;
+    color: black;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+  }
+
+  .selected span {
+    display: flex;
+  }
+
+
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    50% { transform: translateX(2px); }
+    75% { transform: translateX(-2px); }
+    100% { transform: translateX(0); }
+  }
+
+  .seat.shake {
+    animation: shake 0.5s; /* 动画名称，持续时间 */
+    animation-iteration-count: 1; /* 动画播放次数 */
+  }
 </style>
 
 {% endblock stylesheets %}
@@ -71,7 +127,7 @@
                         <div class="card-body">
                             <div class="row">
 
-                                <div class="col-md-6 col-lg-4">
+                                <div class="col-md-4 col-lg-4">
                                     <div class="form-group">
 										<label for="sampleNum">Sample Number</label>
 										<input type="number" class="form-control" id="sampleNum" placeholder="Enter Sample Number" step="1">
@@ -83,9 +139,18 @@
                                     <div id="errorMessage" style="color: red; display: none;">Empty input not allowed!</div>
                                     <div id="successMessage" style="color: green; display: none;">Submit succeed!</div>
                                 </div>
-                                <div id="sampleNameContainer"></div>
-                                <div id="samplePosContainer"></div>
-                                <div id="concentrationContainer"></div>
+
+                                <div class="col-md-4 col-lg-4">
+                                    <div id="sampleNameContainer"></div>
+                                    <div id="concentrationContainer"></div>
+                                </div>
+
+                                <div class="col-md-4 col-lg-4">
+                                    <label>Select Rack</label>
+                                    <div id="seatContainer"></div>
+                                    <div id="errorMessageSelect" style="color: red; display: none;">All seats selected!</div>
+                                    <div id="errorMessageBack" style="color: red; display: none;">Please unselect the latest one first!</div>
+                                </div>
 
                             </div>
                         </div>
@@ -100,14 +165,14 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 <script>
+    let selectedRows = [];
+    let selectedCols = [];
+
     function addInputFields() {
         var number = document.getElementById('sampleNum').value;
         var nameContainer = document.getElementById('sampleNameContainer');
-        var posContainer = document.getElementById('samplePosContainer');
         var concentrationContainer = document.getElementById('concentrationContainer');
-
         nameContainer.innerHTML = ''; // Clear previous inputs
-        posContainer.innerHTML = '';
         concentrationContainer.innerHTML = '';
 
         var errorMessage = document.getElementById('errorMessage');
@@ -127,15 +192,6 @@
 
             for (let i = 0; i < number; i++) {
                 const input = document.createElement('input');
-                input.id = 'samplePos'+(i+1);
-                input.type = 'text';
-                input.className = 'form-control mb-2'; // mb-2 for margin bottom
-                input.placeholder = `Sample position `+(i+1);
-                posContainer.appendChild(input);
-            }
-
-            for (let i = 0; i < number; i++) {
-                const input = document.createElement('input');
                 input.id = 'concentration'+(i+1);
                 input.type = 'text';
                 input.className = 'form-control mb-2'; // mb-2 for margin bottom
@@ -144,6 +200,7 @@
             }
 
             document.getElementById('submitForm').style.display = 'block';
+            generateSeat(number);
         }
     }
 
@@ -163,11 +220,14 @@
             } else {
                 data['sampleName' + (i+1)] = sampleName.value;
             }
-            if (samplePos.value.trim() === '') {
+
+            if (selectedRows.length < number) {
                 allFilled = false;
             } else {
-                data['samplePos' + (i+1)] = samplePos.value;
+                data['sampleRow' + (i+1)] = selectedRows[i];
+                data['sampleCol' + (i+1)] = selectedCols[i];
             }
+
             if (concentration.value.trim() === '') {
                 allFilled = false;
             } else {
@@ -207,7 +267,6 @@
             .then(response => response.json())
             .then(data => {
                 const table = document.getElementById('infoTable');
-                const emptyMessage = document.getElementById('noOngoingMessage');
 
                 data.forEach(hansen_data => {
                     if (hansen_data.ongoing === 0) {
@@ -241,5 +300,71 @@
     }
 
     window.onload = loadHistoryData();
+
+    function generateSeat(numSelect) {
+        var errorMessageSelect = document.getElementById('errorMessageSelect');
+        var errorMessageBack = document.getElementById('errorMessageBack');
+        const seatContainer = document.getElementById('seatContainer');
+        const rows = 5;
+        const cols = 16;
+        let globalClickCount = 0; // 全局点击次数，用于分配座位编号
+
+        var selectedSeat = {};
+
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                const seat = document.createElement('div');
+                seat.classList.add('seat');
+                seat.dataset.row = i + 1;
+                seat.dataset.col = j + 1;
+                seat.dataset.selected = false; // 初始化座位未被选中
+                const span = document.createElement('span');
+                seat.appendChild(span);
+
+                seat.addEventListener('click', function () {
+                    if (this.dataset.selected === "false" && numSelect > 0) {
+                        this.dataset.selected = "true";
+                        globalClickCount += 1; // 增加全局点击次数
+                        this.classList.add('selected');
+                        span.textContent = globalClickCount; // 显示座位编号
+                        numSelect -= 1;
+                        console.log(`Seat selected: Row ${this.dataset.row}, Column ${this.dataset.col}, Seat number: ${globalClickCount}`);
+                        errorMessageSelect.style.display = 'none';
+                        errorMessageBack.style.display = 'none';
+                        selectedRows.push(i);
+                        selectedCols.push(j);
+                    } else if (this.dataset.selected === "false" && numSelect === 0) {
+                        errorMessageSelect.style.display = 'block';
+                        errorMessageBack.style.display = 'none';
+                    } else if (i === selectedRows[selectedRows.length-1] && j === selectedCols[selectedCols.length-1]){
+                        this.dataset.selected = "false";
+                        globalClickCount -= 1; // 增加全局点击次数
+                        numSelect += 1;
+                        this.classList.remove('selected');
+                        span.textContent = ''; // 取消显示座位编号
+                        selectedRows.pop();
+                        selectedCols.pop();
+                        errorMessageSelect.style.display = 'none';
+                        errorMessageBack.style.display = 'none';
+                        // 这里不记录取消选中的操作，所以不打印日志
+                    } else {
+                        errorMessageSelect.style.display = 'none';
+                        errorMessageBack.style.display = 'block';
+                    }
+
+                    this.classList.remove('shake'); // 先移除类以确保动画可以再次触发
+                    void this.offsetWidth; // 触发重绘以确保动画可以重新开始
+                    this.classList.add('shake');
+
+                });
+                seat.addEventListener('animationend', function () {
+                    this.classList.remove('shake');
+                });
+                seatContainer.appendChild(seat);
+            }
+            const breakElement = document.createElement('br');
+            seatContainer.appendChild(breakElement);
+        }
+    }
 </script>
 {% endblock javascripts %}	
