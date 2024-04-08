@@ -13,6 +13,7 @@
     }
 
     th, td {
+        width: 25%;
         padding: 8px; /* 添加内填充 */
         text-align: left; /* 文本对齐 */
         border-bottom: 1px solid #ddd; /* 底部边框线 */
@@ -32,7 +33,7 @@
       padding: 0 0;
     }
 
-      .seatContainer {
+  .seatContainer {
     display: flex;
     flex-wrap: wrap;
     width: 230px; /* 根据座位大小和间距调整容器宽度 */
@@ -106,6 +107,7 @@
                         <div class="card-header">
                             <div class="card-title">Ongoing Experiment</div>
                         </div>
+
                         <div class="card-body">
                             <div id="infoContainer">
                                 <table id="infoTable" border="1">
@@ -119,6 +121,7 @@
                                 </table>
                             </div>
                         </div>
+
                     </div>
 
                     <div class="card">
@@ -172,17 +175,21 @@
     let notAvailRows = [];
     let notAvailCols = [];
 
-    fetch('/rack_avail')
-        .then(response => response.json())
-        .then(data => {
-        data.forEach(rack_data => {
-            notAvailRows.push(rack_data.row);
-            notAvailCols.push(rack_data.col);
+    function updateRack() {
+        fetch('/rack_avail')
+            .then(response => response.json())
+            .then(data => {
+            data.forEach(rack_data => {
+                notAvailRows.push(rack_data.row);
+                notAvailCols.push(rack_data.col);
+            });
+        })
+        .catch((error) => {
+            console.error('Error:', error);
         });
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
+    }
+
+    updateRack();
 
     function addInputFields() {
         var number = document.getElementById('sampleNum').value;
@@ -228,6 +235,8 @@
         for (let i = 0; i < number; i++) {
             var sampleName = document.getElementById('sampleName' + (i+1));
             var samplePos = document.getElementById('samplePos' + (i+1));
+            var shake = document.getElementById('shake' + (i+1));
+
             if (sampleName.value.trim() === '') {
                 allFilled = false;
             } else {
@@ -272,6 +281,9 @@
                 console.error('Error:', error);
             });
 
+            setTimeout(function() {
+                location.reload();
+            }, 500);
         }
     }
 

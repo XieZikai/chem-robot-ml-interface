@@ -63,6 +63,8 @@ def submit_hansen():
     for i in range(int(data['sampleNum'])):
         cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_row, sample_col, shake) VALUES (?, ?, ?, ?, ?)",
                        (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)], data['shake'+str(i+1)]))
+        cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ?",
+                       (data['sampleRow' + str(i + 1)], data['sampleCol' + str(i + 1)]))
 
     conn.commit()
     cursor.close()
@@ -115,6 +117,8 @@ def submit_particle():
     for i in range(int(data['sampleNum'])):
         cursor.execute("INSERT INTO 'Particle-samples' (father_id, sample_name, sample_row, sample_col, concentration, shake) VALUES (?, ?, ?, ?, ?, ?)",
                        (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)], data['concentration'+str(i+1)], data['shake'+str(i+1)]))
+        cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ?",
+                       (data['sampleRow' + str(i + 1)], data['sampleCol' + str(i + 1)]))
 
     conn.commit()
     cursor.close()
@@ -167,10 +171,13 @@ def submit_solubility():
     for i in range(int(data['sampleNum'])):
         cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_row, sample_col, shake) VALUES (?, ?, ?, ?, ?)",
                        (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)], data['shake'+str(i+1)]))
+        cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ?",
+                       (data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)]))
 
     conn.commit()
     cursor.close()
     conn.close()
+
     return jsonify({'message': 'Complete!'})
 
 

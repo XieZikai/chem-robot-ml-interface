@@ -13,6 +13,7 @@
     }
 
     th, td {
+        width: 25%;
         padding: 8px; /* 添加内填充 */
         text-align: left; /* 文本对齐 */
         border-bottom: 1px solid #ddd; /* 底部边框线 */
@@ -32,7 +33,7 @@
       padding: 0 0;
     }
 
-      .seatContainer {
+  .seatContainer {
     display: flex;
     flex-wrap: wrap;
     width: 230px; /* 根据座位大小和间距调整容器宽度 */
@@ -148,6 +149,7 @@
                                 <div class="col-md-4 col-lg-4">
                                     <label>Select Rack</label>
                                     <div id="seatContainer"></div>
+                                    <div id="errorMessageUnavail" style="color: red; display: none;">This position is not available!</div>
                                     <div id="errorMessageSelect" style="color: red; display: none;">All seats selected!</div>
                                     <div id="errorMessageBack" style="color: red; display: none;">Please unselect the latest one first!</div>
                                 </div>
@@ -167,6 +169,25 @@
 <script>
     let selectedRows = [];
     let selectedCols = [];
+
+    let notAvailRows = [];
+    let notAvailCols = [];
+
+    function updateRack() {
+        fetch('/rack_avail')
+            .then(response => response.json())
+            .then(data => {
+            data.forEach(rack_data => {
+                notAvailRows.push(rack_data.row);
+                notAvailCols.push(rack_data.col);
+            });
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
+
+    updateRack();
 
     function addInputFields() {
         var number = document.getElementById('sampleNum').value;
@@ -276,6 +297,9 @@
                 console.error('Error:', error);
             });
 
+            setTimeout(function() {
+                location.reload();
+            }, 500);
         }
     }
 
@@ -319,6 +343,8 @@
     function generateSeat(numSelect) {
         var errorMessageSelect = document.getElementById('errorMessageSelect');
         var errorMessageBack = document.getElementById('errorMessageBack');
+        var errorMessageUnavail = document.getElementById('errorMessageUnavail');
+
         const seatContainer = document.getElementById('seatContainer');
         const rows = 5;
         const cols = 16;
@@ -333,22 +359,37 @@
                 seat.dataset.row = i + 1;
                 seat.dataset.col = j + 1;
                 seat.dataset.selected = false; // 初始化座位未被选中
+                seat.dataset.unavail = false;
+
+                for (let k = 0; k < notAvailCols.length; k++) {
+                    if (notAvailRows[k] === i+1 && notAvailCols[k] === j+1) {
+                        seat.dataset.unavail = true;
+                        seat.classList.add('unavail');
+                    }
+                }
+
                 const span = document.createElement('span');
                 seat.appendChild(span);
 
                 seat.addEventListener('click', function () {
-                    if (this.dataset.selected === "false" && numSelect > 0) {
+                    if (this.dataset.unavail === "true") {
+                        errorMessageUnavail.style.display = 'block';
+                        errorMessageSelect.style.display = 'none';
+                        errorMessageBack.style.display = 'none';
+                    } else if (this.dataset.selected === "false" && numSelect > 0) {
                         this.dataset.selected = "true";
                         globalClickCount += 1; // 增加全局点击次数
                         this.classList.add('selected');
                         span.textContent = globalClickCount; // 显示座位编号
                         numSelect -= 1;
                         console.log(`Seat selected: Row ${this.dataset.row}, Column ${this.dataset.col}, Seat number: ${globalClickCount}`);
+                        errorMessageUnavail.style.display = 'none';
                         errorMessageSelect.style.display = 'none';
                         errorMessageBack.style.display = 'none';
                         selectedRows.push(i);
                         selectedCols.push(j);
                     } else if (this.dataset.selected === "false" && numSelect === 0) {
+                        errorMessageUnavail.style.display = 'none';
                         errorMessageSelect.style.display = 'block';
                         errorMessageBack.style.display = 'none';
                     } else if (i === selectedRows[selectedRows.length-1] && j === selectedCols[selectedCols.length-1]){
@@ -359,10 +400,12 @@
                         span.textContent = ''; // 取消显示座位编号
                         selectedRows.pop();
                         selectedCols.pop();
+                        errorMessageUnavail.style.display = 'none';
                         errorMessageSelect.style.display = 'none';
                         errorMessageBack.style.display = 'none';
                         // 这里不记录取消选中的操作，所以不打印日志
                     } else {
+                        errorMessageUnavail.style.display = 'none';
                         errorMessageSelect.style.display = 'none';
                         errorMessageBack.style.display = 'block';
                     }
