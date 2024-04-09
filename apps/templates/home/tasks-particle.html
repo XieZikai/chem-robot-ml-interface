@@ -57,6 +57,10 @@
     background-color: #f00;
   }
 
+  .seat.margin {
+    background-color: #333333;
+  }
+
   .seat span {
     display: none;
     position: absolute;
@@ -360,6 +364,11 @@
                 seat.dataset.col = j + 1;
                 seat.dataset.selected = false; // 初始化座位未被选中
                 seat.dataset.unavail = false;
+
+                if (i % 2 === 1 || j % 2 === 1) {
+                    seat.dataset.unavail = true;
+                    seat.classList.add('margin');
+                }
 
                 for (let k = 0; k < notAvailCols.length; k++) {
                     if (notAvailRows[k] === i+1 && notAvailCols[k] === j+1) {

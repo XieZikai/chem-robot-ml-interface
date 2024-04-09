@@ -9,6 +9,9 @@ sys.path.append(os.path.join(current_dir, 'robotiq'))
 from UR_tasks import URTasks as URT
 from util import row_col_mapping
 
+import sqlite3
+import datetime
+
 # python Execution.py --vial 1 --shake
 
 def parse_arguments():
@@ -16,6 +19,39 @@ def parse_arguments():
     parser.add_argument('--vial', type=int, required=True, help='Vial number to pick')
     parser.add_argument('--shake', action='store_true', help='Whether to perform shaking')
     return parser.parse_args()
+
+
+def run_database_monitor():
+    conn = sqlite3.connect(os.path.join(os.path.dirname(current_dir), 'history.db'))
+    cursor = conn.cursor()
+
+    while True:
+        for table in ['Hansen', 'Particle', 'Solubility']:
+            try:
+                cursor.execute("SELECT * FROM ?", (table,))
+                data = cursor.fetchall()
+                for row in data:
+                    if row[3] == 0:  # ongoing = 0 -> task not running
+                        # ongoing = 1 -> task running
+                        cursor.execute("UPDATE ? SET ongoing = 1 WHERE id = ?", (table, row[0]))
+                        conn.commit()
+                        # select data from sample table
+                        cursor.execute("SELECT * from '?' WHERE father_id = ?", (table+'-samples', row[0]))
+                        sample_data = cursor.fetchall()
+                        for sample in sample_data:
+                            img = run_experiment(sample[3], sample[4], sample[5])  # sample_row, sample_col, shake
+                            current_time = str(datetime.datetime.now())
+                            cursor.execute("INSERT INTO '?' (father_id, image, time) VALUES (?, ?, ?)", (table+'-image', row[0], img, current_time))
+                            conn.commit()
+                        # ongoing = 2 -> task finished
+                        cursor.execute("UPDATE ? SET ongoing = 2 WHERE id = ?", (table, row[0]))
+                        conn.commit()
+            except Exception as e:
+                print("Error:", e)
+            finally:
+                cursor.close()
+                conn.close()
+            time.sleep(5)
 
 
 def run_experiment(vial_row, vial_col, shake):

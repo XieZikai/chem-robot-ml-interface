@@ -69,6 +69,7 @@ def submit_hansen():
     conn.commit()
     cursor.close()
     conn.close()
+
     return jsonify({'message': 'Complete!'})
 
 
