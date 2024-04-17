@@ -51,6 +51,8 @@ def submit_hansen():
     time = str(datetime.datetime.now())
     cursor.execute("INSERT INTO Hansen (time, sample_number, ongoing) VALUES (?, ?, ?)",
                    (time, data['sampleNum'], 0))
+    cursor.execute("INSERT INTO AllTasks (time, sample_number, ongoing) VALUES (?, ?, ?)",
+                   (time, data['sampleNum'], 0))
     conn.commit()
     cursor.close()
     conn.close()
@@ -106,6 +108,8 @@ def submit_particle():
     time = str(datetime.datetime.now())
     cursor.execute("INSERT INTO Particle (time, sample_number, ongoing) VALUES (?, ?, ?)",
                    (time, data['sampleNum'], 0))
+    cursor.execute("INSERT INTO AllTasks (time, sample_number, ongoing) VALUES (?, ?, ?)",
+                   (time, data['sampleNum'], 0))
     conn.commit()
     cursor.close()
     conn.close()
@@ -159,6 +163,8 @@ def submit_solubility():
     cursor = conn.cursor()
     time = str(datetime.datetime.now())
     cursor.execute("INSERT INTO Solubility (time, sample_number, ongoing) VALUES (?, ?, ?)",
+                   (time, data['sampleNum'], 0))
+    cursor.execute("INSERT INTO AllTasks (time, sample_number, ongoing) VALUES (?, ?, ?)",
                    (time, data['sampleNum'], 0))
     conn.commit()
     cursor.close()

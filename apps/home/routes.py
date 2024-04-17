@@ -8,6 +8,7 @@ from flask_login import login_required
 from jinja2 import TemplateNotFound
 
 from apps.home.data_routes import *
+from apps.home.index_routes import *
 
 
 @blueprint.route('/index')

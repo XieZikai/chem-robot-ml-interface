@@ -108,3 +108,14 @@ class RackAvailability(db.Model):
     row = db.Column(db.Integer)
     col = db.Column(db.Integer)
     available = db.Column(db.Integer)
+
+
+class AllTasks(db.Model):
+    __bind_key__ = 'history_db'
+    __tablename__ = 'AllTasks'
+
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    time = db.Column(db.String(64), unique=True)
+    sample_number = db.Column(db.Integer)
+    ongoing = db.Column(db.Integer)
+    comments = db.Column(db.String(64))
