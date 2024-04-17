@@ -15,7 +15,6 @@ def index_get_task_num():
     finished = 0
     awaiting = 0
 
-
     for database in [Hansen, Particle, Solubility]:
         ongoing += len(database.query.filter_by(ongoing=1).all())
         finished += len(database.query.filter_by(ongoing=2).all())
