@@ -20,6 +20,7 @@ class HansenImage(db.Model):
     father_id = db.Column(db.Integer)
     image = db.Column(db.LargeBinary)
     time = db.Column(db.String(64), unique=True)
+    prediction = db.Column(db.Integer)
 
 
 class HansenSamples(db.Model):
@@ -53,6 +54,7 @@ class ParticleImage(db.Model):
     father_id = db.Column(db.Integer)
     image = db.Column(db.LargeBinary)
     time = db.Column(db.String(64), unique=True)
+    prediction = db.Column(db.Integer)
 
 
 class ParticleSamples(db.Model):
@@ -86,6 +88,7 @@ class SolubilityImage(db.Model):
     father_id = db.Column(db.Integer)
     image = db.Column(db.LargeBinary)
     time = db.Column(db.String(64), unique=True)
+    prediction = db.Column(db.Integer)
 
 
 class SolubilitySamples(db.Model):
