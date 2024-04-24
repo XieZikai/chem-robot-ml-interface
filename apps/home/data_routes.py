@@ -38,7 +38,7 @@ def get_hansen_image_id():
 @login_required
 def get_hansen_images(father_id):
     images = HansenImage.query.filter_by(father_id=father_id).all()
-    images_data = [{'id': image.id, 'image': image.image} for image in images]
+    images_data = [{'id': image.id, 'image': image.image, 'prediction': image.prediction} for image in images]
     return jsonify(images_data)
 
 
@@ -95,7 +95,7 @@ def get_particle_image_id():
 @login_required
 def get_particle_images(father_id):
     images = ParticleImage.query.filter_by(father_id=father_id).all()
-    images_data = [{'id': image.id, 'image': image.image} for image in images]
+    images_data = [{'id': image.id, 'image': image.image, 'prediction': image.prediction} for image in images]
     return jsonify(images_data)
 
 
@@ -151,7 +151,7 @@ def get_solubility_image_id():
 @login_required
 def get_solubility_images(father_id):
     images = SolubilityImage.query.filter_by(father_id=father_id).all()
-    images_data = [{'id': image.id, 'image': image.image} for image in images]
+    images_data = [{'id': image.id, 'image': image.image, 'prediction': image.prediction} for image in images]
     return jsonify(images_data)
 
 
