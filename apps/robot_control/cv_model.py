@@ -48,11 +48,11 @@ def test_model_on_new_image(model, image_path, transform, device):
 
 
 def test_model_on_base64_image(model, img, device):
-    image_data = base64.b64encode(img)
-    image = Image.open(BytesIO(image_data))
+    image_data = base64.b64decode(img)
+    image = Image.open(BytesIO(image_data)).convert('RGB')
     image = val_test_transforms(image).unsqueeze(0)
     with torch.no_grad():
         outputs = model(image.to(device))
         _, predicted = torch.max(outputs, 1)
 
-    return predicted
+    return predicted.detach().numpy()[0]

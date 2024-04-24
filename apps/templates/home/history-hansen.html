@@ -26,6 +26,35 @@
     tr:hover {
         background-color: #f5f5f5; /* 悬停时行的背景色 */
     }
+
+    #gallery {
+        width: 600px;
+        height: 400px;
+        margin: auto;
+        position: relative;
+        background-color: #f0f0f0;
+    }
+    img {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+    .button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: #ddd;
+        border: none;
+        cursor: pointer;
+        padding: 10px;
+        font-size: 16px;
+    }
+        #prevButton {
+        left: 10px;
+    }
+        #nextButton {
+        right: 10px;
+    }
 </style>
 
 {% endblock stylesheets %}
@@ -68,14 +97,17 @@
                         </div>
 
                         <div class="card-body">
-                            <select id="groupSelect" onchange="loadImages()" style="width: 400px; height: 40px;">
+                            <select id="groupSelect" onchange="loadGalleryImage()" style="width: 400px; height: 40px;">
                                 <option value="">Select Hansen experiment history</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div id="imagesContainer"></div>
+                    <div id="gallery" style="display: none">
+                      <button class="button" id="prevButton">←</button>
+                      <div id="imageName" style="text-align: center; margin-top: 5px;"></div>
+                      <img id="galleryImage" src="" alt="Gallery image">
+                      <button class="button" id="nextButton">→</button>
                     </div>
 
                 </div>
@@ -92,6 +124,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.0.0/fetch.min.js"></script>
 
             <script>
+                var currentIndex = 0;
+                var image_list = [];
+
                 document.addEventListener('DOMContentLoaded', function() {
                     fetch('/hansen_image_id')
                         .then(response => response.json())
@@ -105,28 +140,6 @@
                             });
                         });
                 });
-
-                function loadImages() {
-                    const group = document.getElementById('groupSelect').value;
-                    const container = document.getElementById('imagesContainer');
-                    container.innerHTML = '';  // 清空之前的图像
-
-                    if (group) {
-                        fetch(`/hansen_images/${group}`)
-                            .then(response => response.json())
-                            .then(images => {
-                                images.forEach(image => {
-                                    const img = new Image();
-                                    img.src = 'data:image/png;base64,' + image.image;
-
-                                    const card = document.createElement('div');
-                                    card.className = 'card';
-                                    card.appendChild(img);
-                                    container.appendChild(card);
-                                });
-                            });
-                    }
-                }
 
                 function loadHistoryData(){
 
@@ -153,6 +166,50 @@
                 }
 
                 window.onload = loadHistoryData();
+
+                function loadGalleryImage(){
+                    const group = document.getElementById('groupSelect').value;
+                    const gallery = document.getElementById('gallery');
+                    gallery.style.display = "none";
+                    image_list = [];
+
+                    if (group) {
+                        fetch(`/hansen_images/${group}`)
+                            .then(response => response.json())
+                            .then(images => {
+                                gallery.style.display = "block";
+
+                                images.forEach(image => {
+                                    const img = new Image();
+                                    img.src = 'data:image/png;base64,' + image.image;
+                                    img.name = image.prediction;
+                                    image_list.push(img);
+                                    console.log(image_list);
+
+                                    var imageElement = document.getElementById('galleryImage');
+                                    var imageNameElement = document.getElementById('imageName');
+                                    imageElement.src = image_list[currentIndex].src;
+                                    imageNameElement.textContent = 'Prediction result: ' + image_list[currentIndex].name;
+                                });
+                            });
+                    }
+                }
+
+                document.getElementById('prevButton').addEventListener('click', function() {
+                    currentIndex = (currentIndex - 1 + image_list.length) % image_list.length;
+                    var imageElement = document.getElementById('galleryImage');
+                    var imageNameElement = document.getElementById('imageName');
+                    imageElement.src = image_list[currentIndex].src;
+                    imageNameElement.textContent = 'Prediction result: ' + image_list[currentIndex].name;
+                });
+
+                document.getElementById('nextButton').addEventListener('click', function() {
+                    currentIndex = (currentIndex + 1) % image_list.length;
+                    var imageElement = document.getElementById('galleryImage');
+                    var imageNameElement = document.getElementById('imageName');
+                    imageElement.src = image_list[currentIndex].src;
+                    imageNameElement.textContent = 'Prediction result: ' + image_list[currentIndex].name;
+                });
             </script>
 
 {% endblock javascripts %}
