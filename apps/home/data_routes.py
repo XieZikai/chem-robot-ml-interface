@@ -188,9 +188,9 @@ def submit_solubility():
     return jsonify({'message': 'Complete!'})
 
 
-@blueprint.route('/rack_avail')
+@blueprint.route('/rack_avail/<int:rack_id>')
 @login_required
-def rack_avail():
-    data = RackAvailability.query.filter_by(available=1).all()
+def rack_avail(rack_id):
+    data = RackAvailability.query.filter_by(available=1, rack=rack_id).all()
     data = [rack_serializer(rack_data) for rack_data in data]
     return jsonify(data)

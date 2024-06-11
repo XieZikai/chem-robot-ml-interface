@@ -5,8 +5,15 @@ import time
 import logging
 import cv2
 import base64
+import numpy as np
+
+import pyautogui
+import time
+from PIL import ImageGrab
+import subprocess
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 class URTasks:
     def __init__(self, ip, port):
@@ -16,24 +23,34 @@ class URTasks:
 
         # config for vials on rack
         self.pre_pick_positions = {
-            1: [-0.14479129, -0.49328619, 0.07697303, -0.53206640, -3.09373452, 0.00122079],
+            1: [-0.15603602, -0.49166348, 0.07472808, -0.53203629, -3.09370142, 0.00126958],
+            2: [-0.18597074, -0.48020008, 0.07822197, -0.53204346, -3.09369404, 0.00119162],
+            3: [-0.21458722, -0.46806314, 0.07822197, -0.53202747, -3.09370036, 0.00129175],
             # Add more pre_pick positions for other vials here
         }
         self.pick_positions = {
-            1: [-0.14484212, -0.49331475, 0.05350598, -0.53210167, -3.09375955, 0.00129685],
+            1: [-0.15621129, -0.49208866, 0.05703650, -0.53199980, -3.09373162, 0.00136558],
+            2: [-0.18597074, -0.48020008, 0.05703650, -0.53204346, -3.09369404, 0.00119162],
+            3: [-0.21458722, -0.46806314, 0.05703650, -0.53202747, -3.09370036, 0.00129175],
             # Add more pick positions for other vials here
         }
         self.lift_up_positions = {
-            1: [-0.14484212, -0.49331475, 0.10350598, -0.53210167, -3.09375955, 0.00129685],
+            1: [-0.15621129, -0.49208866, 0.12350598, -0.53199980, -3.09373162, 0.00136558],
+            2: [-0.18597074, -0.48020008, 0.12350598, -0.53204346, -3.09369404, 0.00119162],
+            3: [-0.21458722, -0.46806314, 0.12350598, -0.53202747, -3.09370036, 0.00129175],
             # Add more lift_up positions for other vials here
         }
 
         self.drop_positions = {
-            1: [-0.14484212, -0.49331475, 0.06050598, -0.53210167, -3.09375955, 0.00129685],
+            1: [-0.15621129, -0.49208866, 0.06050598, -0.53210167, -3.09375955, 0.00129685],
+            2: [-0.18597074, -0.48020008, 0.06050598, -0.53206121, -3.09374346, 0.00123783],
+            3: [-0.21458722, -0.46806314, 0.06050598, -0.53202747, -3.09370036, 0.00129175],
             # Add more drop positions for other vials here
         }
         self.pre_drop_positions = {
-            1: [-0.14484212, -0.49331475, 0.13350598, -0.53210167, -3.09375955, 0.00129685],
+            1: [-0.15621129, -0.49208866, 0.13350598, -0.53210167, -3.09375955, 0.00129685],
+            2: [-0.18597074, -0.48020008, 0.13350598, -0.53206121, -3.09374346, 0.00123783],
+            3: [-0.21458722, -0.46806314, 0.13350598, -0.53202747, -3.09370036, 0.00129175],
             # Add more pre_drop positions for other vials here
         }
 
@@ -41,7 +58,7 @@ class URTasks:
         """Initializes robot connection and prepares it for operations."""
         self.robot.reconnect_socket()
         print("Robot initialized and ready.")
-        
+
     def go_home(self):
         """Moves the robot to its 'home' position."""
         try:
@@ -49,7 +66,7 @@ class URTasks:
             print("Successfully moved to home position.")
         except Exception as e:
             print(f"Error moving to home position: {e}")
- 
+
     def open_lid(self):
         self.robot.set_digital_output(0, True)
 
@@ -65,17 +82,21 @@ class URTasks:
     def go_to_test(self, q):
         self.robot.movej_tcp(q, 0.5, 0.2)
 
+    def go_to_test_j(self, joint_state):
+
+        self.robot.move_joint_list(joint_state, 0.9, 0.9)
+
     def get_joint_states(self):
         js = self.robot.get_current_joint_positions()
-        formatted_js = ', '.join([f"{val:.8f}" for val in js]) 
-        print(f"[{formatted_js}]")
+        formatted_js = ', '.join([f"{val:.8f}" for val in js])
+        print('joint state, 'f"[{formatted_js}]")
         # print(js)
         return js
 
     def get_tcp(self):
         tcp = self.robot.get_current_tcp()
-        formatted_tcp = ', '.join([f"{val:.8f}" for val in tcp]) 
-        print(f"[{formatted_tcp}]")
+        formatted_tcp = ', '.join([f"{val:.8f}" for val in tcp])
+        print('tcp pose', f"[{formatted_tcp}]")
         # print(tcp)
         return tcp
 
@@ -106,13 +127,13 @@ class URTasks:
     def open_gripper_width(self, width):
         self.gripper.move_and_wait_for_pos(255 - width, 255, 255)
 
-
     '''
     robot manipulation taks
     '''
 
     def go_to_middle(self):
-        joint_state = [-5.40313069e-01, -1.57078326e+00, -1.57077610e+00, -1.57082667e+00, 1.57079339e+00, -1.07924091e-05]
+        joint_state = [-5.40313069e-01, -1.57078326e+00, -1.57077610e+00, -1.57082667e+00, 1.57079339e+00,
+                       -1.07924091e-05]
         logging.info("Moving to middle position...")
         self.robot.move_joint_list(joint_state, 0.9, 0.9)
 
@@ -138,11 +159,11 @@ class URTasks:
         # self.go_to_middle()
         self.go_to_prepress()
         logging.info("Touching...")
-        self.robot.movel_tcp(touch, 0.5, 0.2) #touch pose
+        self.robot.movel_tcp(touch, 0.5, 0.2)  # touch pose
         self.open_gripper_width(48)
         logging.info("Pressing...")
-        self.robot.movel_tcp(press, 0.5, 0.2) #press pose
-        time.sleep(10) # sleep 10 seconds
+        self.robot.movel_tcp(press, 0.5, 0.2)  # press pose
+        time.sleep(10)  # sleep 10 seconds
         self.close_gripper()
         self.go_to_prepress()
         # self.go_to_middle()
@@ -155,11 +176,11 @@ class URTasks:
         self.go_to_prebox()
         self.go_to_abovebox()
         logging.info("Pre insertion...")
-        self.robot.movel_tcp(pre_insertion, 0.5, 0.2) #pre_insertion pose
+        self.robot.movel_tcp(pre_insertion, 0.5, 0.2)  # pre_insertion pose
         logging.info("Inserting...")
-        self.robot.movel_tcp(insertion, 0.5, 0.1) #pinsertionress pose
+        self.robot.movel_tcp(insertion, 0.5, 0.1)  # pinsertionress pose
         self.open_gripper_width(48)
-        self.robot.movel_tcp(pre_insertion, 0.9, 0.7) #pre_insertion pose
+        self.robot.movel_tcp(pre_insertion, 0.9, 0.7)  # pre_insertion pose
         self.go_to_abovebox()
         self.go_to_prebox()
         logging.info("VIal insertation completed.")
@@ -172,12 +193,12 @@ class URTasks:
         self.go_to_prebox()
         self.go_to_abovebox()
         logging.info("Pre unload...")
-        self.robot.movel_tcp(pre_pick, 0.5, 0.2) #pre_insertion pose
+        self.robot.movel_tcp(pre_pick, 0.5, 0.2)  # pre_insertion pose
         logging.info("Inserting...")
-        self.robot.movel_tcp(pick, 0.5, 0.1) #pinsertionress pose
+        self.robot.movel_tcp(pick, 0.5, 0.1)  # pinsertionress pose
         self.close_gripper()
-        self.robot.movel_tcp(pre_pick, 0.5, 0.2) #pre_insertion pose
-        self.robot.movel_tcp(lift_up, 0.5, 0.2) #pre_insertion pose
+        self.robot.movel_tcp(pre_pick, 0.5, 0.2)  # pre_insertion pose
+        self.robot.movel_tcp(lift_up, 0.5, 0.2)  # pre_insertion pose
         self.go_to_abovebox()
         self.go_to_prebox()
         logging.info("VIal insertation completed.")
@@ -188,12 +209,12 @@ class URTasks:
         pick = [-0.14484212, -0.49331475, 0.05350598, -0.53210167, -3.09375955, 0.00129685]
         lift_up = [-0.14484212, -0.49331475, 0.10350598, -0.53210167, -3.09375955, 0.00129685]
         logging.info("Pre pick...")
-        self.robot.movel_tcp(pre_pick, 0.5, 0.2) #pre_insertion pose
-        logging.info("Picking...")
-        self.robot.movel_tcp(pick, 0.5, 0.2) #pinsertionress pose
-        self.close_gripper()
-        self.robot.movel_tcp(pre_pick, 0.5, 0.2) #pre_insertion pose
-        self.robot.movel_tcp(lift_up, 0.8, 0.4) #pre_insertion pose
+        self.robot.movel_tcp(pre_pick, 0.5, 0.2)  # pre_insertion pose
+        # logging.info("Picking...")
+        # self.robot.movel_tcp(pick, 0.5, 0.2) #pinsertionress pose
+        # self.close_gripper()
+        # self.robot.movel_tcp(pre_pick, 0.5, 0.2) #pre_insertion pose
+        # self.robot.movel_tcp(lift_up, 0.8, 0.4) #pre_insertion pose
         logging.info("VIal picking completed.")
 
     def pick_vial(self, i):
@@ -219,11 +240,11 @@ class URTasks:
         # [-0.14457422, -0.49460926, 0.05338074, -0.53147931, -3.09308695, 0.00448485]
         # self.go_to_middle()
         logging.info("Pre droping...")
-        self.robot.movel_tcp(pre_drop, 0.5, 0.2) #pre_insertion pose
+        self.robot.movel_tcp(pre_drop, 0.5, 0.2)  # pre_insertion pose
         logging.info("insertion...")
-        self.robot.movel_tcp(drop, 0.3, 0.1) #pinsertionress pose
+        self.robot.movel_tcp(drop, 0.3, 0.1)  # pinsertionress pose
         self.open_gripper_width(60)
-        self.robot.movel_tcp(pre_drop, 0.5, 0.2) #pre_insertion pose
+        self.robot.movel_tcp(pre_drop, 0.5, 0.2)  # pre_insertion pose
         # self.robot.movel_tcp(lift_up, 0.8, 0.4) #pre_insertion pose
         logging.info("Vial dropping completed.")
 
@@ -236,13 +257,14 @@ class URTasks:
         self.robot.movel_tcp(pre_drop, 0.5, 0.2)  # Pre-drop pose
         logging.info(f"Dropping vial{i}...")
         self.robot.movel_tcp(drop, 0.3, 0.1)  # Drop pose
-        self.open_gripper_width(60)  
+        self.open_gripper_width(60)
         self.robot.movel_tcp(pre_drop, 0.5, 0.2)  # Move back to pre-drop pose
         logging.info(f"Vial{i} dropping completed.")
 
     def capture_image(self, i):
-        camera_index=0
-        image_path='image/image_vial_{i}.jpg'
+        camera_index = 0
+        # i = i
+        image_path = f'image/image_vial_{i}.jpg'
         # Initialize the webcam
         cap = cv2.VideoCapture(camera_index)
 
@@ -265,9 +287,33 @@ class URTasks:
         # Release the webcam
         cap.release()
 
+    def capture_image_screenshot(self):
+        window_title = 'OBS 29.1.3 - Profile: Untitled - Scenes: Untitled'
+        try:
+            # Using wmctrl to bring the window to the front
+            subprocess.run(["wmctrl", "-a", window_title], check=True)
+            print(f"Window with title containing '{window_title}' has been brought to front.")
+        except subprocess.CalledProcessError:
+            print("Failed to bring window to front. Window may not exist.")
+        # Wait for a moment to ensure the window comes to focus
+        time.sleep(1.5)
+        cropper_box = (450, 100, 1100, 620)
+
+        # Capture and save the screenshot of the entire screen
+        screenshot = ImageGrab.grab()
+        screenshot = screenshot.crop(cropper_box)
+        screenshot_np = np.array(screenshot)
+        screenshot_np = cv2.cvtColor(screenshot_np, cv2.COLOR_RGB2BGR)
+        success, encoded_frame = cv2.imencode('.jpg', screenshot_np)
+        base64_img = base64.b64encode(encoded_frame).decode('utf-8')
+        return base64_img
+
     def capture_image_base64(self, i):
         camera_index = 0
         cap = cv2.VideoCapture(camera_index)
+        focus = 120  # min: 0, max: 255, increment:5
+        cap.set(cv2.CAP_PROP_FOCUS, focus)
+
         if not cap.isOpened():
             print("Error: Could not open webcam.")
             return
@@ -282,7 +328,6 @@ class URTasks:
         base64_img = base64.b64encode(encoded_frame).decode('utf-8')
         cap.release()
         return base64_img
-
 
 # # Example of usage
 # if __name__ == "__main__":

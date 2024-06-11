@@ -99,4 +99,8 @@ def rpy2rv(rpy):
 
 
 def row_col_mapping(row, col):
-    return NotImplementedError
+    if row <= 1:
+        return 1
+    elif row <= 3:
+        return 2
+    return 3

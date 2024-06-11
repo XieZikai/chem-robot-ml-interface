@@ -110,6 +110,7 @@ class RackAvailability(db.Model):
     id = db.Column(db.Integer, primary_key=True, unique=True)
     row = db.Column(db.Integer)
     col = db.Column(db.Integer)
+    rack = db.Column(db.Integer)
     available = db.Column(db.Integer)
 
 

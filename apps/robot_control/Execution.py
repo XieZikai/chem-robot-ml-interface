@@ -13,6 +13,11 @@ from util import row_col_mapping
 import sqlite3
 import datetime
 from cv_model import *
+import numpy as np
+
+
+sqlite3.register_adapter(np.int64, lambda val: int(val))
+sqlite3.register_adapter(np.int32, lambda val: int(val))
 
 
 # python Execution.py --vial 1 --shake
@@ -48,22 +53,18 @@ def run_database_monitor():
                             current_time = str(datetime.datetime.now())
                             # todo: change this
                             prediction = test_model_on_base64_image(solubility_model, img, device)
-                            cursor.execute("INSERT INTO '{}' (father_id, image, time, prediction) VALUES ({}, {}, {}, "
-                                           "{})".format(table + '-image', row[0], img, current_time, prediction))
+                            cursor.execute("INSERT INTO '{}' (father_id, image, time, prediction) VALUES (?, ?, ?, ?)".format(table + '-image'), (row[0], img, current_time, int(prediction)))
                             conn.commit()
                         # ongoing = 2 -> task finished
                         cursor.execute("UPDATE {} SET ongoing = 2 WHERE id = {}".format(table, row[0]))
                         conn.commit()
             except Exception as e:
                 print("Error:", e)
-            finally:
-                cursor.close()
-                conn.close()
             time.sleep(5)
 
 
 def run_experiment(vial_row, vial_col, shake):
-    robot = URT(ip="192.168.56.6", port=30003)
+    # robot = URT(ip="192.168.56.6", port=30003)
     robot.go_to_middle()
     robot.activate_gripper()
     robot.open_gripper_width(60)
@@ -82,8 +83,11 @@ def run_experiment(vial_row, vial_col, shake):
     time.sleep(0.5)
     robot.load_vial_to_box()  # tested
     robot.close_lid()  # tested
-    img = robot.capture_image_base64(vial)  # return img
+    robot.open_laser()  # tested
+    time.sleep(1)
+    img = robot.capture_image_screenshot()  # return img
     time.sleep(5)  # here is the time for ML
+    robot.close_laser()  # tested
     robot.open_lid()  # tested
     time.sleep(0.5)
     robot.unload_vial_from_box()  # tested
@@ -149,4 +153,5 @@ def main():
 
 
 if __name__ == '__main__':
+    robot = URT(ip="192.168.56.6", port=30003)
     run_database_monitor()

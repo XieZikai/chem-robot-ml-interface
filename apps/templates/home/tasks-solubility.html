@@ -5,7 +5,7 @@
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
 
-<style>
+<style xmlns="http://www.w3.org/1999/html">
     table {
         width: 100%;
         border-collapse: collapse; /* 移除双边框 */
@@ -153,11 +153,21 @@
                                 </div>
 
                                  <div class="col-md-4 col-lg-4">
-                                    <label>Select Rack</label>
-                                    <div id="seatContainer"></div>
-                                    <div id="errorMessageUnavail" style="color: red; display: none;">This position is not available!</div>
-                                    <div id="errorMessageSelect" style="color: red; display: none;">All position selected!</div>
-                                    <div id="errorMessageBack" style="color: red; display: none;">Please unselect the latest one first!</div>
+                                     <label for="rackSelector">Select Rack:</label>
+                                     <select id="rackSelector" onchange="updateInputField(this.value)">
+                                         <option value="0">Rack 1</option>
+                                         <option value="1">Rack 2</option>
+                                         <option value="2">Rack 3</option>
+                                         <option value="3">Rack 4</option>
+                                     </select>
+
+                                     <br>
+
+                                     <label>Select Position</label>
+                                     <div id="seatContainer"></div>
+                                     <div id="errorMessageUnavail" style="color: red; display: none;">This position is not available!</div>
+                                     <div id="errorMessageSelect" style="color: red; display: none;">All position selected!</div>
+                                     <div id="errorMessageBack" style="color: red; display: none;">Please unselect the latest one first!</div>
                                 </div>
 
                             </div>
@@ -173,19 +183,33 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 <script>
+    const rackNum = 4;
+
+    let selectedRack = 0;
+
     let selectedRows = [];
     let selectedCols = [];
-
     let notAvailRows = [];
     let notAvailCols = [];
+    let sampleNameList = [];
+    let shakeList = [];
 
-    function updateRack() {
-        fetch('/rack_avail')
+    for (let i = 0; i < rackNum; i++) {
+        selectedRows.push([]);
+        selectedCols.push([]);
+        notAvailRows.push([]);
+        notAvailCols.push([]);
+        sampleNameList.push([]);
+        shakeList.push([]);
+    }
+
+    function updateRack(i) {
+        fetch(`/rack_avail/${i}`)
             .then(response => response.json())
             .then(data => {
             data.forEach(rack_data => {
-                notAvailRows.push(rack_data.row);
-                notAvailCols.push(rack_data.col);
+                notAvailRows[i].push(rack_data.row);
+                notAvailCols[i].push(rack_data.col);
             });
         })
         .catch((error) => {
@@ -193,7 +217,10 @@
         });
     }
 
-    updateRack();
+    for (let i = 0; i < rackNum; i++){
+        updateRack(i);
+    }
+    console.log(notAvailRows);
 
     function addInputFields() {
         var number = document.getElementById('sampleNum').value;
@@ -230,6 +257,50 @@
         }
     }
 
+    function updateInputField(newSelectedRack) {
+        var number = document.getElementById('sampleNum').value;
+
+        for (let i = 0; i < number; i++) {
+            // 保存当前输入信息
+            var sampleName = document.getElementById('sampleName' + (i+1));
+            var shake = document.getElementById('shake' + (i+1));
+
+            console.log(i);
+            console.log(newSelectedRack);
+
+            console.log(sampleNameList);
+            if (sampleName.value.trim() === '') {
+                sampleNameList[selectedRack][i] = null;
+            } else {
+                sampleNameList[selectedRack][i] = sampleName.value;
+            }
+
+            if (shake.checked) {
+                shakeList[selectedRack][i] = 1;
+            } else {
+                shakeList[selectedRack][i] = 0;
+            }
+
+
+
+            // 载入之前输入信息
+            if (sampleNameList[newSelectedRack].length == 0 || sampleNameList[newSelectedRack][i] == null) {
+                sampleName.value = '';
+            } else {
+                sampleName.value = sampleNameList[newSelectedRack][i];
+            }
+
+            if (shakeList[newSelectedRack].length == 0 || shakeList[newSelectedRack][i] == 0) {
+                shake.checked = false;
+            } else {
+                shake.checked = true;
+            }
+
+            console.log(i);
+        }
+        selectedRack = newSelectedRack;
+    }
+
     function submitForm() {
         var number = document.getElementById('sampleNum').value;
         var data = {};
@@ -238,7 +309,6 @@
 
         for (let i = 0; i < number; i++) {
             var sampleName = document.getElementById('sampleName' + (i+1));
-            var samplePos = document.getElementById('samplePos' + (i+1));
             var shake = document.getElementById('shake' + (i+1));
 
             if (sampleName.value.trim() === '') {
@@ -356,8 +426,8 @@
                     seat.classList.add('margin');
                 }
 
-                for (let k = 0; k < notAvailCols.length; k++) {
-                    if (notAvailRows[k] === i+1 && notAvailCols[k] === j+1) {
+                for (let k = 0; k < notAvailCols[selectedRack].length; k++) {
+                    if (notAvailRows[selectedRack][k] === i+1 && notAvailCols[selectedRack][k] === j+1) {
                         seat.dataset.unavail = true;
                         seat.classList.add('unavail');
                     }
@@ -381,19 +451,19 @@
                         errorMessageUnavail.style.display = 'none';
                         errorMessageSelect.style.display = 'none';
                         errorMessageBack.style.display = 'none';
-                        selectedRows.push(i);
+                        selectedRows[selectedRack].push(i);
                         selectedCols.push(j);
                     } else if (this.dataset.selected === "false" && numSelect === 0) {
                         errorMessageUnavail.style.display = 'none';
                         errorMessageSelect.style.display = 'block';
                         errorMessageBack.style.display = 'none';
-                    } else if (i === selectedRows[selectedRows.length-1] && j === selectedCols[selectedCols.length-1]){
+                    } else if (i === selectedRows[selectedRack][selectedRows[selectedRack].length-1] && j === selectedCols[selectedCols.length-1]){
                         this.dataset.selected = "false";
                         globalClickCount -= 1; // 增加全局点击次数
                         numSelect += 1;
                         this.classList.remove('selected');
                         span.textContent = ''; // 取消显示座位编号
-                        selectedRows.pop();
+                        selectedRows[selectedRack].pop();
                         selectedCols.pop();
                         errorMessageUnavail.style.display = 'none';
                         errorMessageSelect.style.display = 'none';
