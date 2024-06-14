@@ -8,6 +8,8 @@ from sqlalchemy import func
 from apps.home.models import *
 from apps.utils import rack_serializer, history_serializer, sample_serializer
 
+RACK_NUM = 4
+
 
 @blueprint.route('/image/<int:image_id>')
 @login_required
@@ -162,6 +164,9 @@ def submit_solubility():
     conn = sqlite3.connect('./apps/history.db')
     cursor = conn.cursor()
     time = str(datetime.datetime.now())
+
+    print(data)
+
     cursor.execute("INSERT INTO Solubility (time, sample_number, ongoing) VALUES (?, ?, ?)",
                    (time, data['sampleNum'], 0))
     cursor.execute("INSERT INTO AllTasks (time, sample_number, ongoing) VALUES (?, ?, ?)",
@@ -176,10 +181,12 @@ def submit_solubility():
     cursor = conn.cursor()
 
     for i in range(int(data['sampleNum'])):
-        cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_row, sample_col, shake) VALUES (?, ?, ?, ?, ?)",
-                       (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)], data['shake'+str(i+1)]))
-        cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ?",
-                       (data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)]))
+        for rack in range(RACK_NUM):
+            cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_row, sample_col, shake, rack) VALUES (?, ?, ?, ?, ?, ?)",
+                           (id, data['sampleName'][rack][i], data['sampleRow'][rack][i], data['sampleCol'][rack][i], data['shake'][rack][i], rack))
+
+            cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ? AND rack = ?",
+                           (data['sampleRow'][rack][i], data['sampleCol'][rack][i], rack))
 
     conn.commit()
     cursor.close()

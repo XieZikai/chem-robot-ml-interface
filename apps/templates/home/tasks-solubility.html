@@ -239,6 +239,13 @@
             numSelect[i] = number;
         }
 
+        for (let i = 0; i < rackNum; i++) {
+            shakeList[i] = [];
+            for (let j = 0; j < number; j++) {
+                shakeList[i].push(0);
+            }
+        }
+
         if (number.trim() === '' || !Number.isInteger(parseFloat(number))) {
             errorMessage.style.display = 'block';
         } else {
@@ -304,7 +311,6 @@
         }
         selectedRack = newSelectedRack;
 
-        // todo: 写完这个函数
         updateSeat();
     }
 
@@ -313,28 +319,43 @@
         var data = {};
         var allFilled = true;
         data['sampleNum'] = number;
+        data['sampleName'] = sampleNameList;
+        data['selectedRows'] = selectedRows;
+        data['selectedCols'] = selectedCols;
+        data['shakeList'] = shakeList;
 
         for (let i = 0; i < number; i++) {
+            //  保存当前输入信息 - 以防没有切换过
             var sampleName = document.getElementById('sampleName' + (i+1));
             var shake = document.getElementById('shake' + (i+1));
 
             if (sampleName.value.trim() === '') {
-                allFilled = false;
+                sampleNameList[selectedRack][i] = null;
             } else {
-                data['sampleName' + (i+1)] = sampleName.value;
-            }
-
-            if (selectedRows.length < number) {
-                allFilled = false;
-            } else {
-                data['sampleRow' + (i+1)] = selectedRows[i];
-                data['sampleCol' + (i+1)] = selectedCols[i];
+                sampleNameList[selectedRack][i] = sampleName.value;
             }
 
             if (shake.checked) {
-                data['shake' + (i+1)] = 1;
+                shakeList[selectedRack][i] = 1;
             } else {
-                data['shake' + (i+1)] = 0;
+                shakeList[selectedRack][i] = 0;
+            }
+        }
+
+        for (let j = 0; j < rackNum; j++) {
+
+            for (let i = 0; i < number; i++) {
+
+                var sampleName = document.getElementById('sampleName' + (i+1));
+                var shake = document.getElementById('shake' + (i+1));
+
+                if (sampleNameList[j].length < number || sampleNameList[j][i] == null ||sampleNameList[j][i].trim() === '') {
+                    allFilled = false;
+                }
+
+                if (selectedRows[j].length < number) {
+                    allFilled = false;
+                }
             }
         }
 
