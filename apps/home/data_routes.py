@@ -65,10 +65,12 @@ def submit_hansen():
     cursor = conn.cursor()
 
     for i in range(int(data['sampleNum'])):
-        cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_row, sample_col, shake) VALUES (?, ?, ?, ?, ?)",
-                       (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)], data['shake'+str(i+1)]))
-        cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ?",
-                       (data['sampleRow' + str(i + 1)], data['sampleCol' + str(i + 1)]))
+        for rack in range(RACK_NUM):
+            cursor.execute("INSERT INTO 'Hansen-samples' (father_id, sample_name, sample_row, sample_col, shakeList, rack) VALUES (?, ?, ?, ?, ?, ?)",
+                           (id, data['sampleName'][rack][i], data['selectedRows'][rack][i], data['selectedCols'][rack][i], data['shakeList'][rack][i], rack))
+
+            cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ? AND rack = ?",
+                           (data['selectedRows'][rack][i], data['selectedCols'][rack][i], rack))
 
     conn.commit()
     cursor.close()
@@ -122,10 +124,12 @@ def submit_particle():
     cursor = conn.cursor()
 
     for i in range(int(data['sampleNum'])):
-        cursor.execute("INSERT INTO 'Particle-samples' (father_id, sample_name, sample_row, sample_col, concentration, shake) VALUES (?, ?, ?, ?, ?, ?)",
-                       (id, data['sampleName'+str(i+1)], data['sampleRow'+str(i+1)], data['sampleCol'+str(i+1)], data['concentration'+str(i+1)], data['shake'+str(i+1)]))
-        cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ?",
-                       (data['sampleRow' + str(i + 1)], data['sampleCol' + str(i + 1)]))
+        for rack in range(RACK_NUM):
+            cursor.execute("INSERT INTO 'Particle-samples' (father_id, sample_name, sample_row, sample_col, concentration, shakeList, rack) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                           (id, data['sampleName'][rack][i], data['selectedRows'][rack][i], data['selectedCols'][rack][i], data['concentration'][rack][i], data['shakeList'][rack][i], rack))
+
+            cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ? AND rack = ?",
+                           (data['selectedRows'][rack][i], data['selectedCols'][rack][i], rack))
 
     conn.commit()
     cursor.close()
@@ -182,11 +186,11 @@ def submit_solubility():
 
     for i in range(int(data['sampleNum'])):
         for rack in range(RACK_NUM):
-            cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_row, sample_col, shake, rack) VALUES (?, ?, ?, ?, ?, ?)",
-                           (id, data['sampleName'][rack][i], data['sampleRow'][rack][i], data['sampleCol'][rack][i], data['shake'][rack][i], rack))
+            cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_row, sample_col, shakeList, rack) VALUES (?, ?, ?, ?, ?, ?)",
+                           (id, data['sampleName'][rack][i], data['selectedRows'][rack][i], data['selectedCols'][rack][i], data['shakeList'][rack][i], rack))
 
             cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ? AND rack = ?",
-                           (data['sampleRow'][rack][i], data['sampleCol'][rack][i], rack))
+                           (data['selectedRows'][rack][i], data['selectedCols'][rack][i], rack))
 
     conn.commit()
     cursor.close()
