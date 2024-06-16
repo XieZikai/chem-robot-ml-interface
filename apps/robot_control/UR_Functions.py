@@ -87,17 +87,18 @@ class URfunctions:
     def go_home(self):
         self.move_joint_list(self.home_joint_config)
 
-    def move_joint_list(self, q, v = 0.5, a = 0.2):
+    def move_joint_list(self, q, v = 0.5, a = 0.2, r = 0.05):
         """
         move the arm according joint state
         :param q: joint state list
         :param v: vel
         :param a: acc
+        :param r: blend radius
         """
         self.reconnect_socket()
         joint_positions = ','.join([f"{pos}" for pos in q])
         tcp_command = f"def process():\n"
-        tcp_command += f"  movej([{joint_positions}], a={a}, v={v})\n"
+        tcp_command += f"  movej([{joint_positions}], a={a}, v={v}, a={r})\n"
         tcp_command += "end\n"
         self.sk.send(str.encode(tcp_command))
         self.wait_for_target_joints(q)

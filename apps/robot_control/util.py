@@ -96,11 +96,3 @@ def rpy2rv(rpy):
     R = rpy2rm(rpy)
     rv = rm2rv(R)
     return rv
-
-
-def row_col_mapping(row, col):
-    if row <= 1:
-        return 1
-    elif row <= 3:
-        return 2
-    return 3
