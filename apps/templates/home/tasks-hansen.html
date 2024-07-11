@@ -79,7 +79,6 @@
     display: flex;
   }
 
-
   @keyframes shake {
     0% { transform: translateX(0); }
     25% { transform: translateX(-2px); }
@@ -92,6 +91,17 @@
     animation: shake 0.5s; /* 动画名称，持续时间 */
     animation-iteration-count: 1; /* 动画播放次数 */
   }
+
+    .bounds-row {
+        display: flex;
+        justify-content: space-between;
+    }
+    .bounds-input {
+        flex: 1;
+    }
+    .bounds-input + .bounds-input {
+        margin-left: 10px;
+    }
 </style>
 
 
@@ -152,13 +162,15 @@
                                     <div id="sampleNameContainer"></div>
                                 </div>
 
-                                 <div class="col-md-4 col-lg-4">
+                                 <div class="col-md-4 col-lg-4" id="rackDiv" style="display: none;">
                                      <label for="rackSelector">Select Rack:</label>
                                      <select id="rackSelector" onchange="updateInputField(this.value)">
                                          <option value="0">Rack 1</option>
                                          <option value="1">Rack 2</option>
                                          <option value="2">Rack 3</option>
                                          <option value="3">Rack 4</option>
+                                         <option value="4">Rack 5</option>
+                                         <option value="5">Rack 6</option>
                                      </select>
 
                                      <br>
@@ -183,10 +195,11 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 <script>
-    const rackNum = 4;
+    const rackNum = 6;
 
     const rows = 5;
-    const cols = 16;
+    const cols = 7;
+    const solventOptions = ['Test 1', 'Test 2', 'Test 3'];
 
     let selectedRack = 0;
 
@@ -234,6 +247,7 @@
         var nameContainer = document.getElementById('sampleNameContainer');
         nameContainer.innerHTML = ''; // Clear previous inputs
         var errorMessage = document.getElementById('errorMessage');
+        var rackDiv = document.getElementById('rackDiv');
 
         for (let i = 0; i < numSelect.length; i++) {
             numSelect[i] = number;
@@ -250,12 +264,17 @@
             errorMessage.style.display = 'block';
         } else {
             errorMessage.style.display = 'none';
+            rackDiv.style.display = 'block';
+
             for (let i = 0; i < number; i++) {
                 const input = document.createElement('input');
                 input.id = 'sampleName' + (i+1);
                 input.type = 'text';
-                input.className = 'form-control mb-2'; // mb-2 for margin bottom
+                input.className = 'form-control bounds-input'; // mb-2 for margin bottom
                 input.placeholder = `Sample name ` + (i+1);
+
+                const inputContainer = document.createElement('div');
+                inputContainer.className = 'bounds-row mb-2';
 
                 const checkbox = document.createElement('input');
                 checkbox.id = 'shake' + (i + 1);
@@ -267,7 +286,29 @@
 
                 nameContainer.appendChild(checkbox);
                 nameContainer.appendChild(label);
-                nameContainer.appendChild(input);
+
+                inputContainer.appendChild(input);
+
+                const dropdown = document.createElement('select');
+                dropdown.className = 'form-control bounds-input';
+                dropdown.id = 'solvent' + (i+1);
+
+                const defaultOption = document.createElement('option');
+                defaultOption.text = 'Select a solvent';
+                defaultOption.value = '';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                dropdown.appendChild(defaultOption);
+
+                solventOptions.forEach(option => {
+                    const opt = document.createElement('option');
+                    opt.value = option.toLowerCase().replace(' ', '');
+                    opt.textContent = option;
+                    dropdown.appendChild(opt);
+                });
+                inputContainer.appendChild(dropdown);
+
+                nameContainer.appendChild(inputContainer);
             }
 
             document.getElementById('submitForm').style.display = 'block';
