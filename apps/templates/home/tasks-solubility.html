@@ -118,11 +118,12 @@
                             <div id="infoContainer">
                                 <table id="infoTable" border="1">
                                     <tr>
-                                        <th>id</th>
-                                        <th>time</th>
-                                        <th>sample_num</th>
-                                        <th>ongoing</th>
-                                        <th>comments</th>
+                                        <th>ID</th>
+                                        <th>Time</th>
+                                        <th>Sample number</th>
+                                        <th>Class number</th>
+                                        <th>Ongoing</th>
+                                        <th>Comments</th>
                                     </tr>
                                 </table>
                             </div>
@@ -155,7 +156,16 @@
                                 </div>
 
                                  <div class="col-md-4 col-lg-4" id="rackDiv" style="display: none;">
-                                     <label for="rackSelector">Select Rack:</label>
+                                     <label for="modelSelector">Select model class number:  </label>
+                                     <select id="modelSelector">
+                                         <option value="2">2 classes</option>
+                                         <option value="3">3 classes</option>
+                                         <option value="4">4 classes</option>
+                                     </select>
+
+                                     <br>
+
+                                     <label for="rackSelector">Select Rack:  </label>
                                      <select id="rackSelector" onchange="updateInputField(this.value)">
                                          <option value="0">Rack 1</option>
                                          <option value="1">Rack 2</option>
@@ -202,6 +212,7 @@
     let shakeList = [];
     let globalClickCount = [];  // 全局点击次数，用于分配座位编号
     let numSelect = [];
+    let seatAdded = false;
 
     for (let i = 0; i < rackNum; i++) {
         selectedRows.push([]);
@@ -278,7 +289,11 @@
             }
 
             document.getElementById('submitForm').style.display = 'block';
-            generateSeat();
+
+            if (!seatAdded) {
+                generateSeat();
+                seatAdded = true;
+            }
         }
     }
 
@@ -323,6 +338,7 @@
 
     function submitForm() {
         var number = document.getElementById('sampleNum').value;
+        var numClass = document.getElementById('modelSelector').value;
         var data = {};
         var allFilled = true;
         data['sampleNum'] = number;
@@ -330,6 +346,7 @@
         data['selectedRows'] = selectedRows;
         data['selectedCols'] = selectedCols;
         data['shakeList'] = shakeList;
+        data['numClass'] = numClass;
 
         for (let i = 0; i < number; i++) {
             //  保存当前输入信息 - 以防没有切换过
@@ -411,12 +428,14 @@
                     const id = row.insertCell(0);
                     const time = row.insertCell(1);
                     const sample_number = row.insertCell(2);
-                    const ongoing = row.insertCell(3);
-                    const comments = row.insertCell(4);
+                    const model_class = row.insertCell(3);
+                    const ongoing = row.insertCell(4);
+                    const comments = row.insertCell(5);
 
                     id.innerHTML = hansen_data.id;
                     time.innerHTML = hansen_data.time;
                     sample_number.innerHTML = hansen_data.sample_number;
+                    model_class.innerHTML = hansen_data.model_class;
                     ongoing.innerHTML = hansen_data.ongoing;
                     comments.innerHTML = hansen_data.comments;
                 });

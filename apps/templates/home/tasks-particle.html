@@ -215,6 +215,7 @@
     let shakeList = [];
     let globalClickCount = [];  // 全局点击次数，用于分配座位编号
     let numSelect = [];
+    let seatAdded = false;
 
     for (let i = 0; i < rackNum; i++) {
         selectedRows.push([]);
@@ -306,7 +307,10 @@
             }
 
             document.getElementById('submitForm').style.display = 'block';
-            generateSeat();
+            if (!seatAdded) {
+                generateSeat();
+                seatAdded = true;
+            }
         }
     }
 

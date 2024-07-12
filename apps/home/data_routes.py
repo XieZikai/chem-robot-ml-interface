@@ -171,8 +171,8 @@ def submit_solubility():
 
     print(data)
 
-    cursor.execute("INSERT INTO Solubility (time, sample_number, ongoing) VALUES (?, ?, ?)",
-                   (time, data['sampleNum'], 0))
+    cursor.execute("INSERT INTO Solubility (time, sample_number, ongoing, model_class) VALUES (?, ?, ?, ?)",
+                   (time, data['sampleNum'], 0, data['numClass']))
     cursor.execute("INSERT INTO AllTasks (time, sample_number, ongoing) VALUES (?, ?, ?)",
                    (time, data['sampleNum'], 0))
     conn.commit()       
