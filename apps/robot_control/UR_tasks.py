@@ -280,6 +280,16 @@ class URTasks:
         logging.info("Moving down...")
         self.robot.movel_tcp(tcp, 0.5, 0.2)
 
+    def go_to_pre_record(self):
+        pre_record = [0.37565906, 0.13484910, 0.54545234, 2.22110638, -2.21900675, -0.00766125]
+        logging.info("pre recording...")
+        self.robot.movel_tcp(pre_record, 1.2, 0.25)
+
+    def go_to_stop_record(self):
+        stop_record = [0.37567335, 0.13485381, 0.54547678, -1.20109176, 1.20251809, -1.21144601]
+        logging.info("pre recording...")
+        self.robot.movel_tcp(stop_record, 1.2, 0.25)
+
     def execute_vortex(self):
         logging.info("Starting vortex execution...")
         touch = [6.04667837e-03, -4.92560425e-01, 1.17129372e-01, -5.29484254e-01, -3.09456080e+00, 2.36695984e-03]
@@ -542,7 +552,7 @@ class URTasks:
         cv2.destroyAllWindows()
 
 
-    def capture_image_focus_adjustment_test(self, device='/dev/video0', start_focus=95, end_focus=106, step=5, target_focus=105):
+    def capture_image_focus_adjustment_test(self, filename, device='/dev/video0', start_focus=95, end_focus=106, step=5, target_focus=105):
         # if acquired images are blur, adjust the start_focus into 110, end_focus into 130
         cap = cv2.VideoCapture(0)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
@@ -563,7 +573,7 @@ class URTasks:
                 # Optional: Display the live video feed to see focus changes
                 # cv2.imshow('Live Feed', frame)
                 if focus_value == target_focus:
-                    filename = f'test.jpg'
+                    filename = f'{filename}.jpg'
                     # filename = f'image/rack_{rack_number}_vial_{vial_number}_{sample_name}_loop{loop_iteration}.jpg'
                     cv2.imwrite(filename, frame)
                     print(f"Image saved as {filename} at focus {focus_value}")
