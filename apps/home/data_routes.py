@@ -7,6 +7,7 @@ from sqlalchemy import func
 
 from apps.home.models import *
 from apps.utils import rack_serializer, history_serializer, sample_serializer
+import pandas as pd
 
 RACK_NUM = 4
 
@@ -205,3 +206,16 @@ def rack_avail(rack_id):
     data = RackAvailability.query.filter_by(available=1, rack=rack_id).all()
     data = [rack_serializer(rack_data) for rack_data in data]
     return jsonify(data)
+
+
+@blueprint.route('/get_solvent_info')
+@login_required
+def get_solvent_info():
+    df = pd.read_csv('./apps/yesblend_nowater_solventlist_HSP.csv')
+    solvent_list = df['name'].to_list()
+    return jsonify(solvent_list)
+
+
+@blueprint.route('/solvent_optimize')
+@login_required
+def solvent_optimize():

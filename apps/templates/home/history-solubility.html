@@ -103,13 +103,29 @@
                         </div>
                     </div>
 
-                    <div id="gallery" style="display: none">
-                      <button class="button" id="prevButton">←</button>
-                      <div id="imageName" style="text-align: center; margin-top: 5px;"></div>
-                      <img id="galleryImage" src="" alt="Gallery image">
-                      <button class="button" id="nextButton">→</button>
-                    </div>
+                    <div class="card">
+                        <div class="row">
+                            <div class="col-md-8 col-lg-8">
+                                <div id="gallery" style="display: none">
+                                  <button class="button" id="prevButton">←</button>
+                                  <div id="imageName" style="text-align: center; margin-top: 5px;"></div>
+                                  <img id="galleryImage" src="" alt="Gallery image">
+                                  <button class="button" id="nextButton">→</button>
+                                </div>
+                            </div>
 
+                            <div class="col-md-4 col-lg-4" id="solvent-container" style="display: none;">
+                                <label for="solvent">Choose an solvent and optimize:</label>
+                                <br>
+                                <select id="solvent" name="options">
+                                    <!-- Options will be loaded here by JavaScript -->
+                                </select>
+                                <br>
+                                <button class="button" id="optimize" onclick="solventOptimize()">Submit</button>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -192,7 +208,24 @@
                                     imageNameElement.textContent = 'Prediction result: ' + image_list[currentIndex].name;
                                 });
                             });
-                    }
+                        fetch('/get_solvent_info')
+                            .then(response => response.json())
+                            .then(data => {
+                                const div = document.getElementById('solvent-container');
+                                const selectElement = document.getElementById('solvent');
+                                div.style.display = 'block';
+                                let count = 0;
+                                data.forEach(option => {
+                                    const opt = document.createElement('option');
+                                    opt.value = count;
+                                    opt.textContent = option;
+                                    selectElement.appendChild(opt);
+                                    count += 1;
+                                });
+                            })
+                            .catch(error => console.error('Error:', error));
+                    };
+
                 }
 
                 document.getElementById('prevButton').addEventListener('click', function() {
@@ -210,6 +243,11 @@
                     imageElement.src = image_list[currentIndex].src;
                     imageNameElement.textContent = 'Prediction result: ' + image_list[currentIndex].name;
                 });
+
+                function solventOptimize(){
+                    var solventNumber = document.getElementById('solvent').value;
+                    fetch('/solvent_optimize'. )
+                }
 
             </script>
 
