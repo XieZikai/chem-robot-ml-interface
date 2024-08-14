@@ -147,11 +147,16 @@
 
                                 <div class="col-md-4 col-lg-4">
                                     <div class="form-group">
-										<label for="sampleNum">Sample Number</label>
-										<input type="number" class="form-control" id="sampleNum" placeholder="Enter Sample Number" step="1">
-										<small id="sampleNumHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
-									</div>
-                                    <button onclick="addInputFields()" class="btn btn-primary">Submit Sample Number</button>
+										<label for="sampleNum">Total Sample Number: 25</label>
+                                        <br>
+                                        <small>Solvent samples remain: </small>
+                                        <br>
+                                        <output id="sampleNum">25</output>
+                                        <br>
+                                        <label for="maxSamplePerRack">Max Sample Number Per Rack: </label>
+                                        <input type="number" class="form-control" id="maxSamplePerRack" placeholder="Max Sample Number Per Rack" step="1">
+                                    </div>
+                                    <button onclick="addInputFields()" class="btn btn-primary">Submit</button>
                                     <br><br>
                                     <button id="submitForm" onclick="submitForm()" style="display: none;" class="btn btn-primary">Submit Form</button>
                                     <div id="errorMessage" style="color: red; display: none;">Empty input not allowed!</div>
@@ -202,6 +207,7 @@
     const solventOptions = ['Test 1', 'Test 2', 'Test 3'];
 
     let selectedRack = 0;
+    let totalSampleNum = 25;
 
     let selectedRows = [];
     let selectedCols = [];
@@ -245,7 +251,7 @@
     console.log(notAvailRows);
 
     function addInputFields() {
-        var number = document.getElementById('sampleNum').value;
+        var number = document.getElementById('maxSamplePerRack').value;
         var nameContainer = document.getElementById('sampleNameContainer');
         nameContainer.innerHTML = ''; // Clear previous inputs
         var errorMessage = document.getElementById('errorMessage');
@@ -323,7 +329,7 @@
     }
 
     function updateInputField(newSelectedRack) {
-        var number = document.getElementById('sampleNum').value;
+        var number = document.getElementById('maxSamplePerRack').value;
 
         for (let i = 0; i < number; i++) {
             // 保存当前输入信息
@@ -362,7 +368,7 @@
     }
 
     function submitForm() {
-        var number = document.getElementById('sampleNum').value;
+        var number = document.getElementById('maxSamplePerRack').value;
         var data = {};
         var allFilled = true;
         data['sampleNum'] = number;

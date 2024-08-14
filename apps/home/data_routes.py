@@ -219,3 +219,4 @@ def get_solvent_info():
 @blueprint.route('/solvent_optimize')
 @login_required
 def solvent_optimize():
+    data = pd.read_csv('./apps/yesblend_nowater_solventlist_HSP.csv')
