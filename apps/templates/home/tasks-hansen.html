@@ -246,7 +246,8 @@
     let shakeList = [];
     let globalClickCount = [];  // 全局点击次数，用于分配座位编号
     let numSelect = [];
-
+    let solventList = [];
+    let selectedOptions = [];
     let seatAdded = false;
 
     for (let i = 0; i < rackNum; i++) {
@@ -256,6 +257,8 @@
         notAvailCols.push([]);
         sampleNameList.push([]);
         shakeList.push([]);
+        solventList.push([]);
+        selectedOptions.push([]);
         globalClickCount.push(0);
         numSelect.push(0);  // Array: number of selected position in each rack
     }
@@ -332,6 +335,14 @@
         }
     }
 
+    function newAddInputFields() {
+        document.getElementById('submitForm').style.display = 'block';
+
+        if (!seatAdded) {
+            generateSeat();
+            seatAdded = true;
+        }
+    }
 
     function addInputFields() {
         var number = document.getElementById('maxSamplePerRack').value;
@@ -413,16 +424,27 @@
     }
 
     function updateDropdowns() {
-            let selectedOptions = [];
+            let currentSelectedOptions = [];
             let dropdowns = document.querySelectorAll('select');
             dropdowns = Array.from(dropdowns).filter(dropdown => dropdown.id !== 'rackSelector');
 
             // 收集所有下拉菜单中已被选择的值
             dropdowns.forEach(dropdown => {
                 if (dropdown.value !== "") {
-                    selectedOptions.push(dropdown.value);
+                    currentSelectedOptions.push(dropdown.value);
                 }
             });
+            selectedOptions[selectedRack] = currentSelectedOptions;
+
+            let allSelectedOptions = [];
+
+            for (let i = 0; i < rackNum; i++) {
+                for (let j = 0; j < selectedOptions[i].length; j++){
+                    if (typeof selectedOptions[i][j] !== 'undefined') {
+                        allSelectedOptions.push(selectedOptions[i][j]);
+                    }
+                }
+            }
 
             // 更新每个下拉菜单的选项
             dropdowns.forEach(dropdown => {
@@ -433,7 +455,7 @@
 
                 // 重新添加选项，但排除已被选择的选项
                 solventOptions.forEach(option => {
-                    if (!selectedOptions.includes(option) || option === currentSelection) {
+                    if (!allSelectedOptions.includes(option) || option === currentSelection) {
                         const opt = document.createElement('option');
                         opt.value = option;
                         opt.textContent = option;
@@ -445,6 +467,42 @@
                 });
             });
         }
+
+    function newUpdateInputField(newSelectedRack) {
+
+        for (let i = 0; i < numSelect[selectedRack]; i++) {
+            // Save current input information
+            var sampleName = document.getElementById('sampleName' + (i+1));
+            var shake = document.getElementById('shake' + (i+1));
+
+            if (sampleName.value.trim() === '') {
+                sampleNameList[selectedRack][i] = null;
+            } else {
+                sampleNameList[selectedRack][i] = sampleName.value;
+            }
+
+            // Select bar has been saved when changed, so no need to save here
+
+            if (shake.checked) {
+                shakeList[selectedRack][i] = 1;
+            } else {
+                shakeList[selectedRack][i] = 0;
+            }
+        }
+        for (let i = 0; i < number; i++) {
+            // Delete all elements in nameContainer
+            updateInputLine(0);
+        }
+
+        for (let i = 0; i < numSelect[newSelectedRack]; i++) {
+            // Add new elements in nameContainer
+            updateInputLine(1);
+        }
+
+        for (let i = 0; i < numSelect[newSelectedRack]; i++) {
+            // Load saved input information
+        }
+    }
 
     function updateInputField(newSelectedRack) {
         var number = document.getElementById('maxSamplePerRack').value;
