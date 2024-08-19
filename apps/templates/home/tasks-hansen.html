@@ -282,22 +282,35 @@
     }
     console.log(notAvailRows);
 
-    function updateInputLine(add) {
-        var nameContainer = document.getElementById('sampleNameContainer');
+    function updateInputLine(add, number) {
+        // Parameters:
+        //      add: flag,  1 -> add new input line, 0 -> delete last input line
+        //      number: newly added input line number, no need for deleting
 
+        // For adding solvent options
+        let allSelectedOptions = [];
+        for (let i = 0; i < rackNum; i++) {
+            for (let j = 0; j < selectedOptions[i].length; j++){
+                if (typeof selectedOptions[i][j] !== 'undefined') {
+                    allSelectedOptions.push(selectedOptions[i][j]);
+                }
+            }
+        }
+
+        var nameContainer = document.getElementById('sampleNameContainer');
         if (add == 1) {
 
             const input = document.createElement('input');
-            input.id = 'sampleName' + (numSelect[selectedRack]);
+            input.id = 'sampleName' + (number);
             input.type = 'text';
             input.className = 'form-control bounds-input'; // mb-2 for margin bottom
-            input.placeholder = `Sample name ` + (numSelect[selectedRack]);
+            input.placeholder = `Sample name ` + (number);
 
             const inputContainer = document.createElement('div');
             inputContainer.className = 'bounds-row mb-2';
 
             const checkbox = document.createElement('input');
-            checkbox.id = 'shake' + (numSelect[selectedRack]);
+            checkbox.id = 'shake' + (number);
             checkbox.type = 'checkbox';
             checkbox.className = 'form-check-input ml-2';
 
@@ -311,7 +324,7 @@
 
             const dropdown = document.createElement('select');
             dropdown.className = 'form-control bounds-input';
-            dropdown.id = 'solvent' + (numSelect[selectedRack]);
+            dropdown.id = 'solvent' + (number);
 
             const defaultOption = document.createElement('option');
             defaultOption.text = 'Select a solvent';
@@ -321,11 +334,15 @@
             dropdown.appendChild(defaultOption);
 
             solventOptions.forEach(option => {
-                const opt = document.createElement('option');
-                opt.value = option;
-                opt.textContent = option;
-                dropdown.appendChild(opt);
+                if (!allSelectedOptions.includes(option)) {
+                    const opt = document.createElement('option');
+                    opt.value = option;
+                    opt.textContent = option;
+                    dropdown.appendChild(opt);
+                }
             });
+
+
             dropdown.addEventListener('change', updateDropdowns);
             inputContainer.appendChild(dropdown);
 
@@ -489,18 +506,35 @@
                 shakeList[selectedRack][i] = 0;
             }
         }
-        for (let i = 0; i < number; i++) {
+        for (let i = 0; i < numSelect[selectedRack]; i++) {
             // Delete all elements in nameContainer
-            updateInputLine(0);
+            updateInputLine(0, i+1);
+
         }
 
         for (let i = 0; i < numSelect[newSelectedRack]; i++) {
             // Add new elements in nameContainer
-            updateInputLine(1);
-        }
+            updateInputLine(1, i+1);
 
-        for (let i = 0; i < numSelect[newSelectedRack]; i++) {
             // Load saved input information
+            var sampleName = document.getElementById('sampleName' + (i+1));
+            sampleName.value = sampleNameList[newSelectedRack][i];
+
+            var shake = document.getElementById('shake' + (i+1));
+
+            if (shakeList[selectedRack][i] = 1) {
+                shake.checked = true;
+            } else {
+                shake.checked = false;
+            }
+
+            var dropdown = document.getElementById('solvent' + (i+1));
+            const defaultOption = document.createElement('option');
+            defaultOption.text = selectedOptions[selectedRack][i];
+            defaultOption.value = selectedOptions[selectedRack][i];
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            dropdown.appendChild(defaultOption);
         }
     }
 
