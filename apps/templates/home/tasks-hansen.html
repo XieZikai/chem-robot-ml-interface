@@ -558,8 +558,8 @@
 
             var dropdown = document.getElementById('solvent' + (i+1));
             const defaultOption = document.createElement('option');
-            defaultOption.text = selectedOptions[selectedRack][i];
-            defaultOption.value = selectedOptions[selectedRack][i];
+            defaultOption.text = selectedOptions[newSelectedRack][i];
+            defaultOption.value = selectedOptions[newSelectedRack][i];
             defaultOption.disabled = true;
             defaultOption.selected = true;
             dropdown.appendChild(defaultOption);
