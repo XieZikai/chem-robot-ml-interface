@@ -495,7 +495,7 @@
             const currentSelection = dropdown.value;
 
             // 清空下拉菜单的所有选项
-            dropdown.innerHTML = '<option value="">Select an option</option>';
+            dropdown.innerHTML = '<option value="" disabled selected>Select a solvent</option>';
 
             // 重新添加选项，但排除已被选择的选项
             solventOptions.forEach(option => {
