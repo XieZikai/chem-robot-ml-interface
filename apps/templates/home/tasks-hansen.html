@@ -618,24 +618,7 @@
         data['selectedRows'] = selectedRows;
         data['selectedCols'] = selectedCols;
         data['shakeList'] = shakeList;
-
-        for (let i = 0; i < number; i++) {
-            //  保存当前输入信息 - 以防没有切换过
-            var sampleName = document.getElementById('sampleName' + (i+1));
-            var shake = document.getElementById('shake' + (i+1));
-
-            if (sampleName.value.trim() === '') {
-                sampleNameList[selectedRack][i] = null;
-            } else {
-                sampleNameList[selectedRack][i] = sampleName.value;
-            }
-
-            if (shake.checked) {
-                shakeList[selectedRack][i] = 1;
-            } else {
-                shakeList[selectedRack][i] = 0;
-            }
-        }
+        data['selectedOptions'] = selectedOptions;
 
         for (let j = 0; j < rackNum; j++) {
 
@@ -650,6 +633,12 @@
 
                 if (selectedRows[j].length < number) {
                     allFilled = false;
+                }
+
+                if (shake.checked) {
+                    shakeList[j][i] = 1;
+                } else {
+                    shakeList[j][i] = 0;
                 }
             }
         }

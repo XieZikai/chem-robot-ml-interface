@@ -34,6 +34,7 @@ class HansenSamples(db.Model):
     sample_col = db.Column(db.Integer)
     shake = db.Column(db.Integer)
     rack = db.Column(db.Integer)
+    solvent_name = db.Column(db.String(64))
 
 
 class Particle(db.Model):
