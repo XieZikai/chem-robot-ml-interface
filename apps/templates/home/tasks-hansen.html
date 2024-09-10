@@ -627,6 +627,13 @@
                 var sampleName = document.getElementById('sampleName' + (i+1));
                 var shake = document.getElementById('shake' + (i+1));
 
+                // make sure all solvents are selected
+                if (remainSampleNum > 0) {
+                    allFilled = false;
+                }
+
+                // todo: 处理这里的bug，现在必须填满max才能不报错
+
                 if (sampleNameList[j].length < number || sampleNameList[j][i] == null ||sampleNameList[j][i].trim() === '') {
                     allFilled = false;
                 }
@@ -635,11 +642,6 @@
                     allFilled = false;
                 }
 
-                if (shake.checked) {
-                    shakeList[j][i] = 1;
-                } else {
-                    shakeList[j][i] = 0;
-                }
             }
         }
 
