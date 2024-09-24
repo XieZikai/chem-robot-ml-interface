@@ -622,16 +622,16 @@
 
         for (let j = 0; j < rackNum; j++) {
 
-            for (let i = 0; i < number; i++) {
+            for (let i = 0; i < globalClickCount[j]; i++) {
 
                 var sampleName = document.getElementById('sampleName' + (i+1));
                 var shake = document.getElementById('shake' + (i+1));
 
-                if (sampleNameList[j].length < number || sampleNameList[j][i] == null ||sampleNameList[j][i].trim() === '') {
+                if (sampleNameList[j].length < globalClickCount[j] || sampleNameList[j][i] == null ||sampleNameList[j][i].trim() === '') {
                     allFilled = false;
                 }
 
-                if (selectedRows[j].length < number) {
+                if (selectedRows[j].length < globalClickCount[j] ) {
                     allFilled = false;
                 }
 

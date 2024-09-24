@@ -67,7 +67,7 @@ def submit_hansen():
 
     for i in range(int(data['sampleNum'])):
         for rack in range(RACK_NUM):
-            cursor.execute("INSERT INTO 'Hansen-samples' (father_id, sample_name, sample_row, sample_col, shakeList, rack, solvent_name) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            cursor.execute("INSERT INTO 'Hansen-samples' (father_id, sample_name, sample_row, sample_col, shake, rack, solvent_name) VALUES (?, ?, ?, ?, ?, ?, ?)",
                            (id, data['sampleName'][rack][i], data['selectedRows'][rack][i], data['selectedCols'][rack][i], data['shakeList'][rack][i], rack, data['selectedOptions'][rack][i]))
 
             cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ? AND rack = ?",
