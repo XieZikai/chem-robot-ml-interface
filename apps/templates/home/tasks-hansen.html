@@ -558,7 +558,13 @@
 
             var dropdown = document.getElementById('solvent' + (i+1));
             const defaultOption = document.createElement('option');
-            defaultOption.text = selectedOptions[newSelectedRack][i];
+
+            if (selectedOptions[newSelectedRack][i] == undefined) {
+                defaultOption.text = 'Select a solvent';
+            } else {
+                defaultOption.text = selectedOptions[newSelectedRack][i];
+            }
+
             defaultOption.value = selectedOptions[newSelectedRack][i];
             defaultOption.disabled = true;
             defaultOption.selected = true;
