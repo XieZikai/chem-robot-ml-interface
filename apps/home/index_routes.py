@@ -30,8 +30,17 @@ def index_get_task_num():
 @blueprint.route('/index_get_task_info')
 @login_required
 def index_get_task_info():
-
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'time': self.time,
+            'ongoing': self.ongoing,
+            'sample_number': self.sample_number,
+            'comments': self.comments
+        }
     data = AllTasks.query.all()
+    data = [to_dict(task) for task in data]
+
     print(jsonify(data))
 
     return jsonify(data)

@@ -172,7 +172,6 @@
                                  <div class="col-md-4 col-lg-4" id="rackDiv" style="display: none;">
                                      <label for="rackSelector">Select Rack:</label>
                                      <select id="rackSelector" onchange="newUpdateInputField(this.value)">
-                                     <!--<select id="rackSelector" onchange="UpdateInputField(this.value)">-->
                                          <option value="0">Rack 1</option>
                                          <option value="1">Rack 2</option>
                                          <option value="2">Rack 3</option>
@@ -282,7 +281,6 @@
     for (let i = 0; i < rackNum; i++){
         updateRack(i);
     }
-    console.log(notAvailRows);
 
     function updateInputLine(add, number) {
         // Parameters:
@@ -304,7 +302,6 @@
 
             const input = document.createElement('input');
             input.id = 'sampleName' + (number+1);
-            console.log(input.id);
 
             input.type = 'text';
             input.className = 'form-control bounds-input'; // mb-2 for margin bottom
@@ -513,7 +510,6 @@
     }
 
     function newUpdateInputField(newSelectedRack) {
-        // todo: 下拉菜单有bug要修
 
         for (let i = 0; i < globalClickCount[selectedRack]; i++) {
             // Save current input information
@@ -576,19 +572,14 @@
         updateSeat();
     }
 
-    function updateInputField(newSelectedRack) {
-        var number = document.getElementById('maxSamplePerRack').value;
+    function submitForm() {
 
-        for (let i = 0; i < number; i++) {
-            // 保存当前输入信息
+        for (let i = 0; i < globalClickCount[selectedRack]; i++) {
+            // Save current input information in case of not changing rack
             var sampleName = document.getElementById('sampleName' + (i+1));
             var shake = document.getElementById('shake' + (i+1));
 
-            if (sampleName.value.trim() === '') {
-                sampleNameList[selectedRack][i] = null;
-            } else {
-                sampleNameList[selectedRack][i] = sampleName.value;
-            }
+            // Select bar has been saved when changed, so no need to save here
 
             if (shake.checked) {
                 shakeList[selectedRack][i] = 1;
@@ -596,26 +587,13 @@
                 shakeList[selectedRack][i] = 0;
             }
 
-            // 载入之前输入信息
-            if (sampleNameList[newSelectedRack].length == 0 || sampleNameList[newSelectedRack][i] == null) {
-                sampleName.value = '';
+            if (sampleName.value.trim() === '') {
+                sampleNameList[selectedRack][i] = null;
             } else {
-                sampleName.value = sampleNameList[newSelectedRack][i];
+                sampleNameList[selectedRack][i] = sampleName.value;
             }
-
-            if (shakeList[newSelectedRack].length == 0 || shakeList[newSelectedRack][i] == 0) {
-                shake.checked = false;
-            } else {
-                shake.checked = true;
-            }
-
         }
-        selectedRack = newSelectedRack;
 
-        updateSeat();
-    }
-
-    function submitForm() {
         var number = document.getElementById('maxSamplePerRack').value;
         var data = {};
         var allFilled = true;
@@ -625,24 +603,36 @@
         data['selectedCols'] = selectedCols;
         data['shakeList'] = shakeList;
         data['selectedOptions'] = selectedOptions;
+        data['globalClickCount'] = globalClickCount;
+
+        console.log(`globalClickCount`, globalClickCount);
+        console.log(`sampleNameList`, sampleNameList);
+        console.log(`selectedRows`, selectedRows);
+        console.log(`selectedCols`, selectedCols);
+        console.log(`shakeList`, shakeList);
+        console.log(`selectedOptions`, selectedOptions);
 
         for (let j = 0; j < rackNum; j++) {
 
             for (let i = 0; i < globalClickCount[j]; i++) {
-
-                var sampleName = document.getElementById('sampleName' + (i+1));
-                var shake = document.getElementById('shake' + (i+1));
+                // Check if all input fields are filled
 
                 if (sampleNameList[j].length < globalClickCount[j] || sampleNameList[j][i] == null ||sampleNameList[j][i].trim() === '') {
                     allFilled = false;
+                    console.log(`Rack num ${j+1}$`);
+                    console.log(`Sample name ${i+1} is not filled`);
                 }
 
                 if (selectedRows[j].length < globalClickCount[j] ) {
                     allFilled = false;
+                    console.log(`Rack num ${j+1}$`);
+                    console.log(`Row ${i+1} is not selected`);
                 }
 
                 if (remainSampleNum > 0) {
                     allFilled = false;
+                    console.log(`Rack num ${j+1}$` );
+                    console.log(`Not enough sample number`);
                 }
 
             }
@@ -655,7 +645,6 @@
             document.getElementById('errorMessage').style.display = 'none';
             document.getElementById('successMessage').style.display = 'block';
             var jsonData = JSON.stringify(data);
-            console.log(jsonData);
 
             fetch('/submit_hansen_task', {
                 method: 'POST',
@@ -762,7 +751,6 @@
                 this.classList.add('selected');
                 span.textContent = globalClickCount[selectedRack]; // 显示座位编号
                 numSelect[selectedRack]  -= 1;
-                console.log(`Seat selected: Row ${this.dataset.row}, Column ${this.dataset.col}, Seat number: ${globalClickCount[selectedRack]}`);
                 errorMessageUnavail.style.display = 'none';
                 errorMessageSelect.style.display = 'none';
                 errorMessageBack.style.display = 'none';

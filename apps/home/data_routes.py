@@ -9,7 +9,7 @@ from apps.home.models import *
 from apps.utils import rack_serializer, history_serializer, sample_serializer
 import pandas as pd
 
-RACK_NUM = 4
+RACK_NUM = 6
 
 
 @blueprint.route('/image/<int:image_id>')
@@ -65,11 +65,11 @@ def submit_hansen():
     conn = sqlite3.connect('./apps/history.db')
     cursor = conn.cursor()
 
-    for i in range(int(data['sampleNum'])):
-        for rack in range(RACK_NUM):
+    for rack in range(RACK_NUM):
+        click_count = data['globalClickCount'][rack]
+        for i in range(click_count):
             cursor.execute("INSERT INTO 'Hansen-samples' (father_id, sample_name, sample_row, sample_col, shake, rack, solvent_name) VALUES (?, ?, ?, ?, ?, ?, ?)",
                            (id, data['sampleName'][rack][i], data['selectedRows'][rack][i], data['selectedCols'][rack][i], data['shakeList'][rack][i], rack, data['selectedOptions'][rack][i]))
-
             cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ? AND rack = ?",
                            (data['selectedRows'][rack][i], data['selectedCols'][rack][i], rack))
 
