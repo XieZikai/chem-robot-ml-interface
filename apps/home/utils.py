@@ -30,6 +30,7 @@ class MyHandler(FileSystemEventHandler):
         # Monitor the file creation
         if event.src_path.endswith(self.target_file):
             print(f'{self.target_file} created!')
+            start_optimize()
 
     def on_deleted(self, event):
         # Monitor the file deletion
@@ -40,6 +41,7 @@ class MyHandler(FileSystemEventHandler):
         # Monitor the file modification
         if event.src_path.endswith(self.target_file):
             print(f'{self.target_file} modified!')
+            start_optimize()
 
 
 def monitor_directory(path=MONITOR_PATH, target_file=TARGET_FILE):
