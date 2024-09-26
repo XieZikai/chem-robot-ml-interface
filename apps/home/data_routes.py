@@ -6,7 +6,7 @@ import datetime
 from sqlalchemy import func
 
 from apps.home.models import *
-from apps.utils import rack_serializer, history_serializer, sample_serializer
+from apps.utils import rack_serializer, history_serializer
 import pandas as pd
 
 RACK_NUM = 6
