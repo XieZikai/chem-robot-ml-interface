@@ -19,6 +19,7 @@ import os
 
 MONITOR_PATH = './apps'
 TARGET_FILE = 'experiment_result.csv'
+task_status = {'status': 'Not Started'}
 
 
 # File watcher to monitor the file changes in the database
@@ -59,6 +60,9 @@ def monitor_directory(path=MONITOR_PATH, target_file=TARGET_FILE):
 
 
 def start_optimize():
+    global task_status
+    task_status['status'] = 'Started'
+
     file_path = os.path.join(MONITOR_PATH, TARGET_FILE)
     data = pd.read_csv(file_path)
     good_solvents = data[data['Solub'] == 1][['delta_d', 'delta_p', 'delta_h']].values
@@ -111,6 +115,7 @@ def start_optimize():
         )
         return result
 
+    task_status['status'] = 'Optimizing step 1'
     best_result = iterative_optimization(param_bounds, num_iterations=1000, seed_value=seed_value)
 
     # Check and print the best result
@@ -119,8 +124,12 @@ def start_optimize():
         optimized_radius = best_result.x[3]
         print('Optimized sphere center:', optimized_center)
         print('Optimized sphere radius:', optimized_radius)
+        task_status['status'] = 'Step 1 completed'
+        task_status['optimized_center'] = optimized_center.tolist()
+        task_status['optimized_radius'] = optimized_radius
     else:
         print("Optimization failed.")
+        task_status['status'] = 'Step 1 failed'
 
     methods = [
         'Nelder-Mead',
@@ -133,22 +142,35 @@ def start_optimize():
     # Increase the maximum number of iterations
     max_iter = 1000  # Example: 10000 iterations
 
+    task_status['status'] = 'Optimizing step 2'
+
     for method in methods:
         try:
             options = {
                 'maxiter': max_iter,
                 'disp': True
             }
+
+            task_status['method'] = method
+            parameters = None
+
             if method == 'Nelder-Mead':
-                options.update({'xatol': 1e-9, 'fatol': 1e-9})
+                parameters = {'xatol': 1e-9, 'fatol': 1e-9}
+                options.update(parameters)
             elif method == 'Powell':
-                options.update({'xtol': 1e-9, 'ftol': 1e-9})
+                parameters = {'xtol': 1e-9, 'ftol': 1e-9}
+                options.update(parameters)
             elif method == 'COBYLA':
-                options.update({'rhobeg': 1.0})  # 'rhoend' is not a valid parameter for COBYLA
+                parameters = {'rhobeg': 1.0}  # 'rhoend' is not a valid parameter for COBYLA
+                options.update(parameters)
             elif method == 'SLSQP':
-                options.update({'ftol': 1e-9, 'disp': True})
+                parameters = {'ftol': 1e-9, 'disp': True}
+                options.update(parameters)
             elif method == 'trust-constr':
-                options.update({'gtol': 1e-9})  # Use 'gtol' instead of 'x_tol'
+                parameters = {'gtol': 1e-9}
+                options.update(parameters)  # Use 'gtol' instead of 'x_tol'
+
+            task_status['parameters'] = parameters
 
             result = minimize(
                 fitness,
@@ -157,9 +179,16 @@ def start_optimize():
                 bounds=param_bounds,
                 options=options
             )
+
             if result.success:
                 print(f"{method} - Successful: True, Result: {result.x}")
+                task_status['status'] = 'Step 2 completed'
+                task_status['result'] = result.x.tolist()
             else:
                 print(f"{method} - Successful: False, Message: {result.message}")
+                task_status['status'] = 'Step 2 failed'
+                task_status['result'] = result.message
         except Exception as e:
             print(f"{method} - Error: This method may not be suitable for this problem. Error message: {str(e)}")
+            task_status['status'] = 'Step 2 failed'
+            task_status['result'] = str(e)

@@ -1,0 +1,155 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Hansen Solubility Parameter Optimization {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style>
+    status {
+        transition: opacity 0.5s ease;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse; /* 移除双边框 */
+        margin: 20px 0; /* 添加一些外边距 */
+    }
+
+    th, td {
+        padding: 8px; /* 添加内填充 */
+        text-align: left; /* 文本对齐 */
+        border-bottom: 1px solid #ddd; /* 底部边框线 */
+    }
+
+    th {
+        background-color: #f2f2f2; /* 标题背景色 */
+        color: #333; /* 标题文字颜色 */
+    }
+
+    tr:hover {
+        background-color: #f5f5f5; /* 悬停时行的背景色 */
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="content">
+        <div class="page-inner">
+            <div class="page-header">
+                <h4 class="page-title">Hansen Solubility Parameter Experiment Optimization Process</h4>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="card">
+
+                        <div class="card-header">
+                            <div class="card-title">History</div>
+                        </div>
+
+                        <div class="card-body">
+                            <div id="infoContainer">
+                                <table id="infoTable" border="1">
+                                    <tr>
+                                        <th>id</th>
+                                        <th>time</th>
+                                        <th>sample_num</th>
+                                        <th>ongoing</th>
+                                        <th>comments</th>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Optimization Status</div>
+                        </div>
+
+                        <div class="card-body">
+                            <div id="statusContainer">
+                                <p id="status">Waiting for task to start</p>
+                                <button onclick="startTask()">Start Optimization</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+    <script>
+        let dotCount = 0;
+        let dotInterval;
+        let statusElement = document.getElementById('status');
+
+        function startTask() {
+            fetch('/start_optimize')
+                .then(response => response.json())
+                .then(data => console.log(data));
+            updateDots();
+            checkStatus();
+        }
+
+        function checkStatus() {
+            setInterval(() => {
+                fetch('/task_status')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('status').innerText = data.status;
+
+                    });
+            }, 4000); // 每秒请求一次
+        }
+
+        function updateDots() {
+            clearInterval(dotInterval);
+
+            base_context = statusElement.textContent;
+
+            // update dots per second
+            dotInterval = setInterval(() => {
+                dotCount = (dotCount + 1) % 4; // 循环从0到3
+                statusElement.textContent = base_context + '.'.repeat(dotCount);
+            }, 1000);
+        }
+
+        function loadHistoryData(){
+
+            fetch('/hansen_history') // 确保这个URL与你的Flask路由匹配
+                .then(response => response.json())
+                .then(data => {
+                    const table = document.getElementById('infoTable');
+                    data.forEach(hansen_data => {
+                        if (hansen_data.id == "{{ task_id }}") {
+                            const row = table.insertRow();
+                            const id = row.insertCell(0);
+                            const time = row.insertCell(1);
+                            const sample_number = row.insertCell(2);
+                            const ongoing = row.insertCell(3);
+                            const comments = row.insertCell(4);
+
+                            id.innerHTML = hansen_data.id;
+                            time.innerHTML = hansen_data.time;
+                            sample_number.innerHTML = hansen_data.sample_number;
+                            ongoing.innerHTML = hansen_data.ongoing;
+                            comments.innerHTML = hansen_data.comments;
+                        }
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        window.onload = loadHistoryData();
+        startTask();
+
+    </script>
+{% endblock javascripts %}

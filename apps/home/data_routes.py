@@ -1,9 +1,11 @@
 from apps.home import blueprint
-from flask import jsonify, request
+from apps.home.utils import monitor_directory, task_status
+from flask import jsonify, request, render_template
 from flask_login import login_required
 import sqlite3
 import datetime
 from sqlalchemy import func
+import threading
 
 from apps.home.models import *
 from apps.utils import rack_serializer, history_serializer
@@ -216,7 +218,19 @@ def get_solvent_info():
     return jsonify(solvent_list)
 
 
-@blueprint.route('/solvent_optimize')
+@blueprint.route('/optimize/<int:task_id>')
 @login_required
-def solvent_optimize():
-    data = pd.read_csv('./apps/yesblend_nowater_solventlist_HSP.csv')
+def optimize(task_id):
+    return render_template('home/optimize.html', task_id=task_id)
+
+
+@blueprint.route('/task_status')
+def get_task_status():
+    return jsonify(task_status)
+
+
+@blueprint.route('/start_optimize')
+def start_task():
+    thread = threading.Thread(target=monitor_directory)
+    thread.start()
+    return jsonify({'message': 'Task started!'})
