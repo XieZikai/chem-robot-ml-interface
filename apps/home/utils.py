@@ -50,6 +50,7 @@ def monitor_directory(path=MONITOR_PATH, target_file=TARGET_FILE):
     observer = Observer()
     observer.schedule(event_handler, path, recursive=False)
     observer.start()
+    task_status['status'] = 'Monitoring directory'
 
     try:
         while True:
