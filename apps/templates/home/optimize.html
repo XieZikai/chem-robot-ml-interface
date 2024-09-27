@@ -95,8 +95,7 @@
             fetch('/start_optimize')
                 .then(response => response.json())
                 .then(data => console.log(data));
-            updateDots();
-            checkStatus();
+            updateStatus();
         }
 
         function checkStatus() {
@@ -105,12 +104,11 @@
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById('status').innerText = data.status;
-
                     });
-            }, 4000); // 每秒请求一次
+            }, 4000); // request per 4 seconds
         }
 
-        function updateDots() {
+        function updateStatus() {
             clearInterval(dotInterval);
 
             base_context = statusElement.textContent;
@@ -120,6 +118,15 @@
                 dotCount = (dotCount + 1) % 4; // 循环从0到3
                 statusElement.textContent = base_context + '.'.repeat(dotCount);
             }, 1000);
+
+            setInterval(() => {
+                fetch('/task_status')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('status').innerText = data.status;
+                        base_context = data.status;
+                    });
+            }, 8000); // request per 6 seconds
         }
 
         function loadHistoryData(){
