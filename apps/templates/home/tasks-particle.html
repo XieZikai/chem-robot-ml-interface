@@ -177,7 +177,7 @@
 
                                  <div class="col-md-4 col-lg-4" id="rackDiv" style="display: none;">
                                      <label for="rackSelector">Select Rack:</label>
-                                     <select id="rackSelector" onchange="updateInputField(this.value)">
+                                     <select id="rackSelector" onchange="newUpdateInputField(this.value)">
                                          <option value="0">Rack 1</option>
                                          <option value="1">Rack 2</option>
                                          <option value="2">Rack 3</option>
@@ -384,6 +384,7 @@
                 sampleConcentrationList[selectedRack][i] = null;
             } else {
                 sampleConcentrationList[selectedRack][i] = concentration.value;
+            }
         }
 
         var number = document.getElementById('maxSamplePerRack').value;
@@ -611,6 +612,8 @@
             const concentration = document.createElement('input');
             concentration.id = 'concentration' + (number+1);
             concentration.type = 'number';
+            concentration.className = 'form-control bounds-input';
+            concentration.placeholder = `Concentration ` + (number+1);
             concentration.step = '0.01';
             concentration.min = '0';
             concentration.max = '100';
