@@ -57,7 +57,7 @@ def monitor_directory(path=MONITOR_PATH, target_file=TARGET_FILE):
             time.sleep(1)
     except KeyboardInterrupt:
         observer.stop()
-    observer.join()
+    observer.join() 
 
 
 def start_optimize():

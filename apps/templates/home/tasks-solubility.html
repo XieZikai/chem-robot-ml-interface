@@ -93,7 +93,16 @@
     animation-iteration-count: 1; /* 动画播放次数 */
   }
 
-
+    .bounds-row {
+        display: flex;
+        justify-content: space-between;
+    }
+    .bounds-input {
+        flex: 1;
+    }
+    .bounds-input + .bounds-input {
+        margin-left: 10px;
+    }
 </style>
 
 
@@ -140,15 +149,24 @@
 
                                 <div class="col-md-4 col-lg-4">
                                     <div class="form-group">
-										<label for="sampleNum">Total Sample Number</label>
+										<label for="sampleNum" id="totalSampleNumber">Total Sample Number: </label>
 										<input type="number" class="form-control" id="sampleNum" placeholder="Enter Sample Number" step="1">
-										<small id="sampleNumHelp" class="form-text text-muted">Please enter the total number of samples for this experiment.</small>
+										<small id="totalNumHelp" class="form-text text-muted">Please enter the total number of samples for this experiment.</small>
+                                        <br>
+                                        <button onclick="submitTotalNumber()" class="btn btn-primary">Submit Total Sample</button>
 									</div>
-                                    <button onclick="addInputFields()" class="btn btn-primary">Submit Sample Number</button>
-                                    <br><br>
-                                    <button id="submitForm" onclick="submitForm()" style="display: none;" class="btn btn-primary">Submit Form</button>
-                                    <div id="errorMessage" style="color: red; display: none;">Empty input not allowed!</div>
-                                    <div id="successMessage" style="color: green; display: none;">Submit succeed!</div>
+                                    <div id="addInputContainer" style="display: none;">
+                                        <output id="remainedSample">0</output> <small> samples remain.</small>
+                                        <br>
+                                        <label for="maxSamplePerRack">Max Sample Number Per Rack: </label>
+                                        <input type="number" class="form-control" id="maxSamplePerRack" placeholder="Max Sample Number Per Rack" step="1">
+
+                                        <button onclick="newAddInputFields()" class="btn btn-primary">Submit</button>
+                                        <small id="NumHelp" class="form-text text-muted">Please enter the maximum number of samples per rack for this experiment.</small>
+                                        <button id="submitForm" onclick="submitForm()" style="display: none;" class="btn btn-primary">Submit Form</button>
+                                        <div id="errorMessage" style="color: red; display: none;">Empty input not allowed!</div>
+                                        <div id="successMessage" style="color: green; display: none;">Submit succeed!</div>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4 col-lg-4">
@@ -166,7 +184,7 @@
                                      <br>
 
                                      <label for="rackSelector">Select Rack:  </label>
-                                     <select id="rackSelector" onchange="updateInputField(this.value)">
+                                     <select id="rackSelector" onchange="newUpdateInputField(this.value)">
                                          <option value="0">Rack 1</option>
                                          <option value="1">Rack 2</option>
                                          <option value="2">Rack 3</option>
@@ -182,6 +200,7 @@
                                      <div id="errorMessageUnavail" style="color: red; display: none;">This position is not available!</div>
                                      <div id="errorMessageSelect" style="color: red; display: none;">All position selected!</div>
                                      <div id="errorMessageBack" style="color: red; display: none;">Please unselect the latest one first!</div>
+                                     <div id="errorMessageAll" style="color: red; display: none;">No sample remained!</div>
                                 </div>
 
                             </div>
@@ -202,7 +221,9 @@
     const rows = 5;
     const cols = 7;
 
-    let selectedRack = 0;
+    let selectedRack = 0;  // Current selected rack
+    let totalSampleNum = 25;
+    let remainSampleNum = 25;
 
     let selectedRows = [];
     let selectedCols = [];
@@ -244,50 +265,36 @@
     }
     console.log(notAvailRows);
 
-    function addInputFields() {
+    function submitTotalNumber() {
         var number = document.getElementById('sampleNum').value;
-        var nameContainer = document.getElementById('sampleNameContainer');
-        nameContainer.innerHTML = ''; // Clear previous inputs
+        var numberLabel = document.getElementById('totalSampleNumber');
+        numberLabel.innerHTML = 'Total sample number: ' + number;  // Change the total sample output label;
+
+        totalSampleNum = number;
+        remainSampleNum = number;
+        
+        var output = document.getElementById('remainedSample');
+        output.value = number;
+
+        var container = document.getElementById('addInputContainer');
+        container.style.display = 'block';
+    }
+
+    function newAddInputFields() {
+        var number = document.getElementById('maxSamplePerRack').value;
         var errorMessage = document.getElementById('errorMessage');
-        var rackDiv = document.getElementById('rackDiv');
 
         for (let i = 0; i < numSelect.length; i++) {
             numSelect[i] = number;
-        }
-
-        for (let i = 0; i < rackNum; i++) {
-            shakeList[i] = [];
-            for (let j = 0; j < number; j++) {
-                shakeList[i].push(0);
-            }
         }
 
         if (number.trim() === '' || !Number.isInteger(parseFloat(number))) {
             errorMessage.style.display = 'block';
         } else {
             errorMessage.style.display = 'none';
+
+            var rackDiv = document.getElementById('rackDiv');
             rackDiv.style.display = 'block';
-
-            for (let i = 0; i < number; i++) {
-                const input = document.createElement('input');
-                input.id = 'sampleName' + (i+1);
-                input.type = 'text';
-                input.className = 'form-control bounds-input';
-                input.placeholder = `Sample name ` + (i+1);
-
-                const checkbox = document.createElement('input');
-                checkbox.id = 'shake' + (i + 1);
-                checkbox.type = 'checkbox';
-                checkbox.className = 'form-check-input ml-2';
-
-                const label = document.createElement('label');
-                label.textContent = 'Shake it up!';
-
-                nameContainer.appendChild(checkbox);
-                nameContainer.appendChild(label);
-                nameContainer.appendChild(input);
-            }
-
             document.getElementById('submitForm').style.display = 'block';
 
             if (!seatAdded) {
@@ -297,19 +304,14 @@
         }
     }
 
-    function updateInputField(newSelectedRack) {
-        var number = document.getElementById('sampleNum').value;
+    function newUpdateInputField(newSelectedRack) {
 
-        for (let i = 0; i < number; i++) {
-            // 保存当前输入信息
+        for (let i = 0; i < globalClickCount[selectedRack]; i++) {
+            // Save current input information
             var sampleName = document.getElementById('sampleName' + (i+1));
             var shake = document.getElementById('shake' + (i+1));
 
-            if (sampleName.value.trim() === '') {
-                sampleNameList[selectedRack][i] = null;
-            } else {
-                sampleNameList[selectedRack][i] = sampleName.value;
-            }
+            // Select bar has been saved when changed, so no need to save here
 
             if (shake.checked) {
                 shakeList[selectedRack][i] = 1;
@@ -317,28 +319,63 @@
                 shakeList[selectedRack][i] = 0;
             }
 
-            // 载入之前输入信息
-            if (sampleNameList[newSelectedRack].length == 0 || sampleNameList[newSelectedRack][i] == null) {
-                sampleName.value = '';
+            if (sampleName.value.trim() === '') {
+                sampleNameList[selectedRack][i] = null;
             } else {
-                sampleName.value = sampleNameList[newSelectedRack][i];
-            }
-
-            if (shakeList[newSelectedRack].length == 0 || shakeList[newSelectedRack][i] == 0) {
-                shake.checked = false;
-            } else {
-                shake.checked = true;
+                sampleNameList[selectedRack][i] = sampleName.value;
             }
 
         }
+        for (let i = 0; i < globalClickCount[selectedRack]; i++) {
+            // Delete all elements in nameContainer
+            updateInputLine(0, i);
+        }
+
+        for (let i = 0; i < globalClickCount[newSelectedRack]; i++) {
+            // Add new elements in nameContainer
+            updateInputLine(1, i);
+
+            // Load saved input information
+            var sampleName = document.getElementById('sampleName' + (i+1));
+            sampleName.value = sampleNameList[newSelectedRack][i];
+
+            var shake = document.getElementById('shake' + (i+1));
+
+            if (shakeList[newSelectedRack][i] == 1) {
+                shake.checked = true;
+            } else {
+                shake.checked = false;
+            }
+        }
+
         selectedRack = newSelectedRack;
 
         updateSeat();
     }
 
     function submitForm() {
-        var number = document.getElementById('sampleNum').value;
-        var numClass = document.getElementById('modelSelector').value;
+
+        for (let i = 0; i < globalClickCount[selectedRack]; i++) {
+            // Save current input information in case of not changing rack
+            var sampleName = document.getElementById('sampleName' + (i+1));
+            var shake = document.getElementById('shake' + (i+1));
+
+            // Select bar has been saved when changed, so no need to save here
+
+            if (shake.checked) {
+                shakeList[selectedRack][i] = 1;
+            } else {
+                shakeList[selectedRack][i] = 0;
+            }
+
+            if (sampleName.value.trim() === '') {
+                sampleNameList[selectedRack][i] = null;
+            } else {
+                sampleNameList[selectedRack][i] = sampleName.value;
+            }
+        }
+
+        var number = document.getElementById('maxSamplePerRack').value;
         var data = {};
         var allFilled = true;
         data['sampleNum'] = number;
@@ -346,40 +383,33 @@
         data['selectedRows'] = selectedRows;
         data['selectedCols'] = selectedCols;
         data['shakeList'] = shakeList;
+        data['globalClickCount'] = globalClickCount;
+
         data['numClass'] = numClass;
-
-        for (let i = 0; i < number; i++) {
-            //  保存当前输入信息 - 以防没有切换过
-            var sampleName = document.getElementById('sampleName' + (i+1));
-            var shake = document.getElementById('shake' + (i+1));
-
-            if (sampleName.value.trim() === '') {
-                sampleNameList[selectedRack][i] = null;
-            } else {
-                sampleNameList[selectedRack][i] = sampleName.value;
-            }
-
-            if (shake.checked) {
-                shakeList[selectedRack][i] = 1;
-            } else {
-                shakeList[selectedRack][i] = 0;
-            }
-        }
 
         for (let j = 0; j < rackNum; j++) {
 
-            for (let i = 0; i < number; i++) {
+            for (let i = 0; i < globalClickCount[j]; i++) {
+                // Check if all input fields are filled
 
-                var sampleName = document.getElementById('sampleName' + (i+1));
-                var shake = document.getElementById('shake' + (i+1));
-
-                if (sampleNameList[j].length < number || sampleNameList[j][i] == null ||sampleNameList[j][i].trim() === '') {
+                if (sampleNameList[j].length < globalClickCount[j] || sampleNameList[j][i] == null ||sampleNameList[j][i].trim() === '') {
                     allFilled = false;
+                    console.log(`Rack num ${j+1}$`);
+                    console.log(`Sample name ${i+1} is not filled`);
                 }
 
-                if (selectedRows[j].length < number) {
+                if (selectedRows[j].length < globalClickCount[j] ) {
                     allFilled = false;
+                    console.log(`Rack num ${j+1}$`);
+                    console.log(`Row ${i+1} is not selected`);
                 }
+
+                if (remainSampleNum > 0) {
+                    allFilled = false;
+                    console.log(`Rack num ${j+1}$` );
+                    console.log(`Not enough sample number`);
+                }
+
             }
         }
 
@@ -484,6 +514,111 @@
         }
     }
 
+    function seatListener(i, j, span) {
+
+        if (this.dataset.unavail === "true") {  // 不可用位置
+            errorMessageUnavail.style.display = 'block';
+            errorMessageSelect.style.display = 'none';
+            errorMessageBack.style.display = 'none';
+            errorMessageAll.style.display = 'none';
+        } else if (this.dataset.selected === "false" && numSelect[selectedRack] > 0) {  //正常选择位置
+            if (remainSampleNum > 0) {
+                this.dataset.selected = "true";
+                globalClickCount[selectedRack] += 1; // 增加全局点击次数
+                remainSampleNum -= 1; // 减少所需总样品数
+                this.classList.add('selected');
+                span.textContent = globalClickCount[selectedRack]; // 显示座位编号
+                numSelect[selectedRack]  -= 1;
+                errorMessageUnavail.style.display = 'none';
+                errorMessageSelect.style.display = 'none';
+                errorMessageBack.style.display = 'none';
+                errorMessageAll.style.display = 'none';
+                selectedRows[selectedRack].push(i);
+                selectedCols[selectedRack].push(j);
+
+                // new added
+                updateInputLine(1, globalClickCount[selectedRack]-1);
+            } else {
+                errorMessageUnavail.style.display = 'none';
+                errorMessageSelect.style.display = 'none';
+                errorMessageBack.style.display = 'none';
+                errorMessageAll.style.display = 'block';
+            }
+        } else if (this.dataset.selected === "false" && numSelect[selectedRack]  === 0) {
+            errorMessageUnavail.style.display = 'none';
+            errorMessageSelect.style.display = 'block';
+            errorMessageBack.style.display = 'none';
+            errorMessageAll.style.display = 'none';
+        } else if (i === selectedRows[selectedRack][selectedRows[selectedRack].length-1] && j === selectedCols[selectedRack][selectedCols[selectedRack].length-1]){  // 取消选择
+            this.dataset.selected = "false";
+            globalClickCount[selectedRack] -= 1; // 增加全局点击次数
+            remainSampleNum += 1; // 增加所需总样品数
+            numSelect[selectedRack]  += 1;
+            this.classList.remove('selected');
+            span.textContent = ''; // 取消显示座位编号
+            selectedRows[selectedRack].pop();
+            selectedCols[selectedRack].pop();
+            errorMessageUnavail.style.display = 'none';
+            errorMessageSelect.style.display = 'none';
+            errorMessageBack.style.display = 'none';
+            errorMessageAll.style.display = 'none';
+            // 这里不记录取消选中的操作，所以不打印日志
+            // new added
+            updateInputLine(0, globalClickCount[selectedRack]-1);
+        } else {
+            errorMessageUnavail.style.display = 'none';
+            errorMessageSelect.style.display = 'none';
+            errorMessageBack.style.display = 'block';
+            errorMessageAll.style.display = 'none';
+        }
+
+        this.classList.remove('shake'); // 先移除类以确保动画可以再次触发
+        void this.offsetWidth; // 触发重绘以确保动画可以重新开始
+        this.classList.add('shake');
+        var output = document.getElementById('sampleNum');
+        output.value = remainSampleNum;
+    }
+
+    function updateInputLine(add, number) {
+        // Parameters:
+        //      add: flag,  1 -> add new input line, 0 -> delete last input line
+        //      number: newly added input line number, no need for deleting
+
+        var nameContainer = document.getElementById('sampleNameContainer');
+        if (add == 1) {
+
+            const input = document.createElement('input');
+            input.id = 'sampleName' + (number+1);
+
+            input.type = 'text';
+            input.className = 'form-control bounds-input'; // mb-2 for margin bottom
+            input.placeholder = `Sample name ` + (number+1);
+
+            const inputContainer = document.createElement('div');
+            inputContainer.className = 'bounds-row mb-2';
+
+            const checkbox = document.createElement('input');
+            checkbox.id = 'shake' + (number+1);
+            checkbox.type = 'checkbox';
+            checkbox.className = 'form-check-input ml-2';
+
+            const label = document.createElement('label');
+            label.textContent = 'Shake it up!';
+
+            nameContainer.appendChild(checkbox);
+            nameContainer.appendChild(label);
+
+            inputContainer.appendChild(input);
+
+            nameContainer.appendChild(inputContainer);
+        } else {
+            for (let i = 0; i < 3; i++) {
+                // 3 elements in each input line: name, shake
+                nameContainer.removeChild(nameContainer.lastChild);
+            }
+        }
+    }
+
     function generateSeat() {
         var errorMessageSelect = document.getElementById('errorMessageSelect');
         var errorMessageBack = document.getElementById('errorMessageBack');
@@ -519,48 +654,7 @@
                 seat.appendChild(span);
 
                 seat.addEventListener('click', function () {
-                    if (this.dataset.unavail === "true") {
-                        errorMessageUnavail.style.display = 'block';
-                        errorMessageSelect.style.display = 'none';
-                        errorMessageBack.style.display = 'none';
-                    } else if (this.dataset.selected === "false" && numSelect[selectedRack] > 0) {
-                        this.dataset.selected = "true";
-                        globalClickCount[selectedRack] += 1; // 增加全局点击次数
-                        this.classList.add('selected');
-                        span.textContent = globalClickCount[selectedRack]; // 显示座位编号
-                        numSelect[selectedRack]  -= 1;
-                        console.log(`Seat selected: Row ${this.dataset.row}, Column ${this.dataset.col}, Seat number: ${globalClickCount[selectedRack]}`);
-                        errorMessageUnavail.style.display = 'none';
-                        errorMessageSelect.style.display = 'none';
-                        errorMessageBack.style.display = 'none';
-                        selectedRows[selectedRack].push(i);
-                        selectedCols[selectedRack].push(j);
-                    } else if (this.dataset.selected === "false" && numSelect[selectedRack]  === 0) {
-                        errorMessageUnavail.style.display = 'none';
-                        errorMessageSelect.style.display = 'block';
-                        errorMessageBack.style.display = 'none';
-                    } else if (i === selectedRows[selectedRack][selectedRows[selectedRack].length-1] && j === selectedCols[selectedRack][selectedCols[selectedRack].length-1]){
-                        this.dataset.selected = "false";
-                        globalClickCount[selectedRack] -= 1; // 增加全局点击次数
-                        numSelect[selectedRack]  += 1;
-                        this.classList.remove('selected');
-                        span.textContent = ''; // 取消显示座位编号
-                        selectedRows[selectedRack].pop();
-                        selectedCols[selectedRack].pop();
-                        errorMessageUnavail.style.display = 'none';
-                        errorMessageSelect.style.display = 'none';
-                        errorMessageBack.style.display = 'none';
-                        // 这里不记录取消选中的操作，所以不打印日志
-                    } else {
-                        errorMessageUnavail.style.display = 'none';
-                        errorMessageSelect.style.display = 'none';
-                        errorMessageBack.style.display = 'block';
-                    }
-
-                    this.classList.remove('shake'); // 先移除类以确保动画可以再次触发
-                    void this.offsetWidth; // 触发重绘以确保动画可以重新开始
-                    this.classList.add('shake');
-
+                    seatListener.call(this, i, j, span);
                 });
                 seat.addEventListener('animationend', function () {
                     this.classList.remove('shake');

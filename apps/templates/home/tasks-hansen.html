@@ -235,7 +235,7 @@
         'DMSO + Toluene + Acetone (1:0.5:0.5)'
     ];
 
-    let selectedRack = 0;  // 当前rack
+    let selectedRack = 0;  // Current selected rack
     let totalSampleNum = 25;
     let remainSampleNum = 25;
 
@@ -385,85 +385,6 @@
         }
     }
 
-    function addInputFields() {
-        var number = document.getElementById('maxSamplePerRack').value;
-        var nameContainer = document.getElementById('sampleNameContainer');
-        nameContainer.innerHTML = ''; // Clear previous inputs
-        var errorMessage = document.getElementById('errorMessage');
-        var rackDiv = document.getElementById('rackDiv');
-
-        for (let i = 0; i < numSelect.length; i++) {
-            numSelect[i] = number;
-        }
-
-        for (let i = 0; i < rackNum; i++) {
-            shakeList[i] = [];
-            for (let j = 0; j < number; j++) {
-                shakeList[i].push(0);
-            }
-        }
-
-        if (number.trim() === '' || !Number.isInteger(parseFloat(number))) {
-            errorMessage.style.display = 'block';
-        } else {
-            errorMessage.style.display = 'none';
-            rackDiv.style.display = 'block';
-
-            for (let i = 0; i < number; i++) {
-                const input = document.createElement('input');
-                input.id = 'sampleName' + (i+1);
-                input.type = 'text';
-                input.className = 'form-control bounds-input'; // mb-2 for margin bottom
-                input.placeholder = `Sample name ` + (i+1);
-
-                const inputContainer = document.createElement('div');
-                inputContainer.className = 'bounds-row mb-2';
-
-                const checkbox = document.createElement('input');
-                checkbox.id = 'shake' + (i + 1);
-                checkbox.type = 'checkbox';
-                checkbox.className = 'form-check-input ml-2';
-
-                const label = document.createElement('label');
-                label.textContent = 'Shake it up!';
-
-                nameContainer.appendChild(checkbox);
-                nameContainer.appendChild(label);
-
-                inputContainer.appendChild(input);
-
-                const dropdown = document.createElement('select');
-                dropdown.className = 'form-control bounds-input';
-                dropdown.id = 'solvent' + (i+1);
-
-                const defaultOption = document.createElement('option');
-                defaultOption.text = 'Select a solvent';
-                defaultOption.value = '';
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                dropdown.appendChild(defaultOption);
-
-                solventOptions.forEach(option => {
-                    const opt = document.createElement('option');
-                    opt.value = option;
-                    opt.textContent = option;
-                    dropdown.appendChild(opt);
-                });
-                dropdown.addEventListener('change', updateDropdowns);
-                inputContainer.appendChild(dropdown);
-
-                nameContainer.appendChild(inputContainer);
-            }
-
-            document.getElementById('submitForm').style.display = 'block';
-
-            if (!seatAdded) {
-                generateSeat();
-                seatAdded = true;
-            }
-        }
-    }
-
     function updateDropdowns() {
         let currentSelectedOptions = [];
         let dropdowns = document.querySelectorAll('select');
@@ -529,8 +450,8 @@
             } else {
                 sampleNameList[selectedRack][i] = sampleName.value;
             }
-
         }
+
         for (let i = 0; i < globalClickCount[selectedRack]; i++) {
             // Delete all elements in nameContainer
             updateInputLine(0, i);
@@ -546,7 +467,7 @@
 
             var shake = document.getElementById('shake' + (i+1));
 
-            if (shakeList[selectedRack][i] = 1) {
+            if (shakeList[newSelectedRack][i] == 1) {
                 shake.checked = true;
             } else {
                 shake.checked = false;
@@ -568,7 +489,6 @@
         }
 
         selectedRack = newSelectedRack;
-
         updateSeat();
     }
 
@@ -604,13 +524,6 @@
         data['shakeList'] = shakeList;
         data['selectedOptions'] = selectedOptions;
         data['globalClickCount'] = globalClickCount;
-
-        console.log(`globalClickCount`, globalClickCount);
-        console.log(`sampleNameList`, sampleNameList);
-        console.log(`selectedRows`, selectedRows);
-        console.log(`selectedCols`, selectedCols);
-        console.log(`shakeList`, shakeList);
-        console.log(`selectedOptions`, selectedOptions);
 
         for (let j = 0; j < rackNum; j++) {
 
