@@ -15,6 +15,6 @@ def base64_to_pil_image(base64_str):
     image_bytes = io.BytesIO(image_data)
 
     # use PIL to open the BytesIO object，return PIL.Image.Image object
-    image = Image.open(image_bytes)
+    image = Image.open(image_bytes).convert('RGB')
 
     return image
