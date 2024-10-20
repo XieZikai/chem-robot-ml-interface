@@ -68,7 +68,7 @@ def predict_solubility_on_base64_image(img, device='cpu'):
 def load_hsp_model(model_path=None):
     if model_path is None:
         base_path = os.path.dirname(os.path.realpath(__file__))
-        model_path = os.path.join(base_path, 'hsp_model.pth')
+        model_path = os.path.join(base_path, '../ml_models/hsp_model.pth')
     # loads the model, sets to eval, moves to cpu, and returns the model
     model = torch.load(model_path)
     model.eval()
