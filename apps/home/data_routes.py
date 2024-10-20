@@ -109,6 +109,7 @@ def get_particle_images(father_id):
 @blueprint.route('/submit_particle_task', methods=['POST'])
 @login_required
 def submit_particle():
+
     data = request.json
     conn = sqlite3.connect('./apps/history.db')
     cursor = conn.cursor()
@@ -126,11 +127,13 @@ def submit_particle():
     conn = sqlite3.connect('./apps/history.db')
     cursor = conn.cursor()
 
-    for i in range(int(data['sampleNum'])):
-        for rack in range(RACK_NUM):
-            cursor.execute("INSERT INTO 'Particle-samples' (father_id, sample_name, sample_row, sample_col, concentration, shakeList, rack) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                           (id, data['sampleName'][rack][i], data['selectedRows'][rack][i], data['selectedCols'][rack][i], data['concentration'][rack][i], data['shakeList'][rack][i], rack))
-
+    for rack in range(RACK_NUM):
+        click_count = data['globalClickCount'][rack]
+        for i in range(click_count):
+            cursor.execute(
+                "INSERT INTO 'Particle-samples' (father_id, sample_name, sample_row, sample_col, concentration, shake, rack) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (id, data['sampleName'][rack][i], data['selectedRows'][rack][i], data['selectedCols'][rack][i],
+                 data['concentration'][rack][i], data['shakeList'][rack][i], rack))
             cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ? AND rack = ?",
                            (data['selectedRows'][rack][i], data['selectedCols'][rack][i], rack))
 
@@ -171,14 +174,11 @@ def submit_solubility():
     conn = sqlite3.connect('./apps/history.db')
     cursor = conn.cursor()
     time = str(datetime.datetime.now())
-
-    print(data)
-
     cursor.execute("INSERT INTO Solubility (time, sample_number, ongoing, model_class) VALUES (?, ?, ?, ?)",
                    (time, data['sampleNum'], 0, data['numClass']))
     cursor.execute("INSERT INTO AllTasks (time, sample_number, ongoing) VALUES (?, ?, ?)",
                    (time, data['sampleNum'], 0))
-    conn.commit()       
+    conn.commit()
     cursor.close()
     conn.close()
 
@@ -187,18 +187,19 @@ def submit_solubility():
     conn = sqlite3.connect('./apps/history.db')
     cursor = conn.cursor()
 
-    for i in range(int(data['sampleNum'])):
-        for rack in range(RACK_NUM):
-            cursor.execute("INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_row, sample_col, shakeList, rack) VALUES (?, ?, ?, ?, ?, ?)",
-                           (id, data['sampleName'][rack][i], data['selectedRows'][rack][i], data['selectedCols'][rack][i], data['shakeList'][rack][i], rack))
-
+    for rack in range(RACK_NUM):
+        click_count = data['globalClickCount'][rack]
+        for i in range(click_count):
+            cursor.execute(
+                "INSERT INTO 'Solubility-samples' (father_id, sample_name, sample_row, sample_col, shake, rack) VALUES (?, ?, ?, ?, ?, ?)",
+                (id, data['sampleName'][rack][i], data['selectedRows'][rack][i], data['selectedCols'][rack][i],
+                 data['shakeList'][rack][i], rack))
             cursor.execute("UPDATE 'Rack-availability' SET available = 1 WHERE row = ? AND col = ? AND rack = ?",
                            (data['selectedRows'][rack][i], data['selectedCols'][rack][i], rack))
 
     conn.commit()
     cursor.close()
     conn.close()
-
     return jsonify({'message': 'Complete!'})
 
 
