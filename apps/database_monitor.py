@@ -3,7 +3,7 @@ import os
 import time
 import sqlite3
 import datetime
-
+from ml_models import HSPModelLoader, ParticleModelLoader, SolubilityModelLoader
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -14,7 +14,12 @@ def load_model(model_type: str):
     The output of this function should be a model object that can be used to evaluate sample images.
     """
     assert model_type in ['solubility', 'hsp', 'particle'], "Invalid model type!"
-    raise NotImplementedError
+    if model_type == 'solubility':
+        return SolubilityModelLoader()
+    if model_type == 'hsp':
+        return HSPModelLoader()
+    if model_type == 'particle':
+        return ParticleModelLoader()
 
 
 def run_experiment(sample_row: int, sample_col: str, shake: bool):
@@ -41,7 +46,7 @@ def run_database_monitor():
     models = [load_model('hsp'), load_model('particle'), load_model('solubility')]
 
     while True:
-        for index, table in enumerate(['Hansen', 'Particle', 'Solubility']): # Recursively check all tables
+        for table in ['Hansen', 'Particle', 'Solubility']:  # Recursively check all tables
             try:
                 cursor.execute("SELECT * FROM {}".format(table))
                 data = cursor.fetchall()
@@ -53,16 +58,24 @@ def run_database_monitor():
                         # select data from sample table
                         cursor.execute("SELECT * from '{}' WHERE father_id = {}".format(table + '-samples', row[0]))
                         sample_data = cursor.fetchall()
+
                         for sample in sample_data:
-                            if table in ['Hansen', 'Solubility']:  # Check if concentration is needed
+
+                            if table == 'Hansen':  # HSP
                                 # sample[3] = sample_row, sample[4] = sample_col, sample[5] = shake
                                 img = run_experiment(sample[3], sample[4], sample[5])
-                                prediction = predict_on_base64_image(models[index], img)
-                            else:
+                                prediction = models[0].predict(img)
+
+                            elif table == 'Particle':  # Particle size
                                 # sample[3] = sample_row, sample[4] = sample_col, sample[5] = concentration,
                                 # sample[6] = shake
                                 img = run_experiment(sample[3], sample[4], sample[6])
-                                prediction = predict_on_base64_image(models[1], img, sample[5])
+                                prediction = models[1].predict(img, sample[5])
+
+                            else:  # Solubility
+                                # sample[3] = sample_row, sample[4] = sample_col, sample[5] = shake
+                                img = run_experiment(sample[3], sample[4], sample[5])
+                                prediction = models[2].predict(img)
 
                             current_time = str(datetime.datetime.now())
                             cursor.execute(
